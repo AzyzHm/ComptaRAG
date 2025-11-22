@@ -1,2 +1,7 @@
 venv
 .env
+knowledge_base/documents/*
+knowledge_base/extracted_text/*
+knowledge_base/processed_chunks/*
+
+**/__pycache__/
