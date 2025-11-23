@@ -1,4 +1,5 @@
 import re
+import json
 import os
 
 def clean_text(text : str) -> str:
@@ -17,9 +18,9 @@ def chunk_text(text : str, chunk_size:int=800, overlap:int=150) -> list[str]:
 
     return chunks
 
-def preprocess_text(input_folder : str, output_folder : str,category : str) -> None:
-    
+def preprocess_text(input_folder: str, output_folder: str, category: str) -> None:
     os.makedirs(output_folder, exist_ok=True)
+
     for file in os.listdir(input_folder):
         if file.endswith('.txt'):
             with open(os.path.join(input_folder, file), "r", encoding="utf-8") as f:
@@ -29,9 +30,16 @@ def preprocess_text(input_folder : str, output_folder : str,category : str) -> N
             chunks = chunk_text(text)
 
             output_path = os.path.join(output_folder, file.replace('.txt', '.jsonl'))
+
             with open(output_path, 'w', encoding='utf-8') as out:
                 for i, chunk in enumerate(chunks):
-                    out.write(f'{{"id" : "{file}_{i}", "text" : "{chunk}", "category" : "{category}"}}\n')
+                    entry = {
+                        "id": f"{file}_{i}",
+                        "text": chunk,
+                        "category": category
+                    }
+                    json.dump(entry, out, ensure_ascii=False)
+                    out.write("\n")
 
 
 if __name__ == '__main__':

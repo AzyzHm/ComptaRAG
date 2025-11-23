@@ -3,5 +3,6 @@ venv
 knowledge_base/documents/*
 knowledge_base/extracted_text/*
 knowledge_base/processed_chunks/*
+knowledge_base/chroma_db/*
 
 **/__pycache__/
