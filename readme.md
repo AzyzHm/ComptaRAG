@@ -8,6 +8,23 @@ pip install -r requirements.txt
 
 2. Create a .env file to store env variables (APIs).
 
+
+### runing the app (local):
+#### FrontEnd :
+```Powershell
+streamlit run .\frontend\main.py
+```
+
+#### Backend :
+```Powershell
+python -m uvicorn app.main:app --reload
+```
+
+> make sure to do this before in the terminal:
+```Powershell
+$env:PYTHONPATH = "."                          
+```
+
 ### testing queries :
 1. Under IFRS, what criteria must be met for an asset to be recognized on the statement of financial position?
 2. How does IFRS define control for the purposes of consolidating a subsidiary?
