@@ -2,17 +2,18 @@ import ollama
 from google import genai
 from app.config.api_keys import gemini_api_key
 
-def getResponseFromLLM(system_prompt : str, user_prompt : str, model_temp : float):
+def getResponseFromLLM(system_prompt : str, user_prompt : str, model_temp : float, format : str = "json"):
 
     client = genai.Client(api_key=gemini_api_key)
+    response_format = "application/json" if format == "json" else "text/plain"
 
     response = client.models.generate_content(
         model="gemini-2.5-flash",
         contents=user_prompt,
         config=genai.types.GenerateContentConfig(
                 system_instruction=system_prompt,
-                response_mime_type="application/json", # Forces valid JSON output
-                temperature= model_temp 
+                response_mime_type=response_format,
+                temperature= model_temp
             )
         )
     

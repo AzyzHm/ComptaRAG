@@ -32,13 +32,12 @@ workflow = StateGraph(GraphState)
 
 workflow.add_node("router", router_node)
 workflow.add_node("retrieve", retrieval_node)
-workflow.add_node("validate", validate_node) # New Node
+workflow.add_node("validate", validate_node)
 workflow.add_node("web_search", web_search_node)
 workflow.add_node("generate", generate_answer_node)
 
 workflow.set_entry_point("router")
 
-# 1. Router -> Local or Web or Direct
 workflow.add_conditional_edges(
     "router",
     decide_next_node,
@@ -49,10 +48,8 @@ workflow.add_conditional_edges(
     }
 )
 
-# 2. Retrieve -> Validate
 workflow.add_edge("retrieve", "validate")
 
-# 3. Validate -> Generate (if True) OR Web Search (if False)
 workflow.add_conditional_edges(
     "validate",
     post_val_routing,

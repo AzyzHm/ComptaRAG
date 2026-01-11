@@ -3,7 +3,7 @@ from app.config.api_keys import tavily_api_key
 
 tavily = TavilyClient(api_key=tavily_api_key)
 
-def search_web(query: str):
+def search_web(query: str) -> str:
     """
     Performs a search using Tavily and returns a clean context string.
     """
@@ -14,7 +14,6 @@ def search_web(query: str):
             max_results=5
         )
         
-        # Format the results for the LLM
         context = ""
         for result in response['results']:
             context += f"Source: {result['url']}\nContent: {result['content']}\n\n"
