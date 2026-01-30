@@ -1,31 +1,115 @@
+# AI Accounting Assistant
+
+## 1. Project Objectif
+This project aims to help professional people in tunisia find answers to accounting questions by using the power of agentic rag.
+
+---
+
+## 2. Technologies Used
+
+- **FastAPI**: Backend API framework for serving chat and retrieval endpoints.
+- **Streamlit**: Frontend framework for building the interactive chat UI.
+- **ChromaDB**: Vector database for storing and retrieving document embeddings.
+- **Ollama**: Runs the local embedding model (`embeddinggemma`) for document and query embeddings.
+- **Gemini API**: Accesses the `gemini-2.5-flash` LLM for answer generation and query routing.
+- **Tavily API**: Provides web search capabilities to supplement local knowledge.
+
+## 3. Architecture
+
+![Architecture Diagram](assets/architecture.png)
+
+---
+
+## 4. Installation & Setup
+
 ### Getting Started :
 
 1. First Setup a virtual environment and install dependencies using this command :
-```powershell
-python -m venv venv
-pip install -r requirements.txt
-```
+    ```powershell
+    python -m venv venv
+    pip install -r requirements.txt
+    ```
 
 2. Create a .env file to store env variables (APIs).
 
+### Running the app (local):
 
-### runing the app (local):
+Make sure to run this command in the terminal before doing anything:
+```powershell
+$env:PYTHONPATH = "."
+```
+
 #### FrontEnd :
-```Powershell
+```powershell
 streamlit run .\frontend\main.py
 ```
 
 #### Backend :
-```Powershell
+```powershell
 python -m uvicorn app.main:app --reload
 ```
 
-> make sure to do this before in the terminal:
-```Powershell
-$env:PYTHONPATH = "."                          
-```
+---
 
-### testing queries :
+## 5. Project Structure
+
+```
+AI-Accounting-Assistant/
+│
+├── app/                          # FastAPI backend (main API logic)
+│   ├── main.py                   # API entrypoint
+│   ├── config/
+│   │   ├── models.py             # LLM and embedding model utilities
+│   │   ├── api_keys.py           # Initializing Models API Keys
+│   │   └── prompts.py            # Prompt templates for LLM
+│   ├── graph/
+│   │   ├── state.py              # Graph state definition
+│   │   ├── workflow.py           # Orchestration logic for query pipeline
+│   │   └── nodes/
+│   │       ├── generate.py       # Node for generating answers
+│   │       ├── router.py         # Node for routing nodes
+│   │       ├── validate.py       # Node for validating context
+│   │       ├── web_search.py     # Node for searching the web for context
+│   │       └── retrieve.py       # Node for retrieving context from DB
+│   ├── routes/
+│   │   └── chat.py               # Chat API route
+│   └── services/
+│       ├── search_service.py     # Tavily Search Service
+│       └── chroma_service.py     # ChromaDB collection/service
+│
+├── frontend/                     # Streamlit frontend (UI)
+│   └── main.py
+│
+├── knowledge_base/               # Data processing and embedding
+│   ├── documents/                # Raw PDF documents
+│   ├── extracted_text/           # Extracted text from PDFs
+│   ├── processed_chunks/         # Chunked and cleaned text
+│   ├── chroma_db/                # ChromaDB persistent storage
+│   ├── extract_text.py           # PDF text extraction
+│   ├── preprocess.py             # Text cleaning & chunking
+│   └── create_db.py              # Embedding & DB ingestion
+│
+├── assets/                          # Documentation assets
+│   └── architecture.png
+│
+├── requirements.txt              # Python dependencies
+├── .env                          # Environment variables (user-created)
+└── readme.md                     # Project documentation
+```
+---
+
+## 6. Core Concepts
+
+- **Document Extraction**: PDF files are processed using [`knowledge_base/extract_text.py`](knowledge_base/extract_text.py) to extract raw text into `.txt` files.
+- **Text Preprocessing**: Text files are cleaned and split into manageable chunks via [`knowledge_base/preprocess.py`](knowledge_base/preprocess.py), producing `.jsonl` files for each document.
+- **Embedding & Database**: Chunks are embedded using a local model and stored in a persistent vector database (ChromaDB) via [`knowledge_base/create_db.py`](knowledge_base/create_db.py).
+- **Backend API**: The FastAPI backend (`app/main.py`) receives user queries, retrieves relevant chunks from the vector DB, and generates answers using an LLM.
+- **Frontend UI**: The Streamlit frontend (`frontend/main.py`) provides a chat interface for users to interact with the assistant.
+- **Classification**: Each answer is categorized (e.g., IFRS, Tax_code...) for context-aware responses.
+
+---
+
+## 7. testing queries :
 1. Under IFRS, what conditions must be met to recognize a provision, and how does this differ from contingent liabilities? (IFRS)
 
 2. Comment est déterminé le résultat fiscal à partir du résultat comptable selon la législation tunisienne ? (Fiscalité tunisienne)
