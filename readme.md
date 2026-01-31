@@ -1,7 +1,7 @@
 # AI Accounting Assistant
 
 ## 1. Project Objectif
-This project aims to help professional people in tunisia find answers to accounting questions by using the power of agentic rag.
+This project aims to help professional people in tunisia find answers to their accounting questions by using the power of agentic rag.
 
 ---
 

@@ -4,7 +4,6 @@ import ollama
 import os
 import time
 
-# CONFIGURATION
 BATCH_SIZE = 50  
 MODEL_NAME = "embeddinggemma"
 KEEP_ALIVE = "60m" # Keep model in memory for 60 minutes to prevent reloading
@@ -48,7 +47,6 @@ def process_batch(batch_entries, collection):
 
     for entry in batch_entries:
         try:
-            # We batch the DB write
             emb = get_embedding(entry["text"])
             
             ids.append(entry["id"])
@@ -59,7 +57,6 @@ def process_batch(batch_entries, collection):
             print(f"Failed to embed chunk {entry.get('id', 'unknown')}: {e}")
             continue
 
-    # Bulk insert into ChromaDB (Much faster than inserting 1 by 1)
     if ids:
         collection.add(
             ids=ids,
@@ -79,17 +76,15 @@ def ingest_jsonl(path: str) -> None:
                 entry = json.loads(line)
                 current_batch.append(entry)
                 
-                # If batch is full, process and clear it
                 if len(current_batch) >= BATCH_SIZE:
                     process_batch(current_batch, collection)
                     count += len(current_batch)
                     print(f"  - Processed {count} chunks...", end='\r')
-                    current_batch = [] # Reset batch
+                    current_batch = []
                     
             except json.JSONDecodeError:
                 continue
 
-        # Process any remaining items after the loop finishes
         if current_batch:
             process_batch(current_batch, collection)
             count += len(current_batch)
@@ -97,6 +92,7 @@ def ingest_jsonl(path: str) -> None:
     print(f"  - Completed {path} ({count} chunks total)")
 
 def ingest_into_db(input_folder: str) -> None:
+    """ Insert JSONL files into a chromadb database """
     if not os.path.exists(input_folder):
         print(f"Folder not found: {input_folder}")
         return
@@ -105,10 +101,8 @@ def ingest_into_db(input_folder: str) -> None:
         if file.endswith(".jsonl"):
             ingest_jsonl(os.path.join(input_folder, file))
 
-# Client initialization
 client = PersistentClient(path="knowledge_base/chroma_db")
 
-# Creating or loading a collection
 collection = client.get_or_create_collection(
     name="ai_assistant",
     metadata={"hnsw:space": "cosine"}
@@ -116,11 +110,8 @@ collection = client.get_or_create_collection(
 print("ChromaDB Initialized successfully!")
 
 if __name__ == "__main__":
-    # 1. Load model into memory once
     warm_up_model()
 
-    # 2. Ingest Data
-    # Using lists of tasks to keep main cleaner
     folders_to_process = [
         "knowledge_base/processed_chunks/tax_code",
         "knowledge_base/processed_chunks/ifrs",

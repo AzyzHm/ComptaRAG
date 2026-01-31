@@ -4,6 +4,8 @@ from app.config.prompts import validator_prompt
 import json
 
 def validate_node(state: GraphState):
+    """ Validate the context before augmenting the final answer """
+
     if state["category"] == "general_knowledge":
         return {"is_valid": True}
 

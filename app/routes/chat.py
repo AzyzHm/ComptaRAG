@@ -9,6 +9,7 @@ class ChatRequest(BaseModel):
 
 @router.post("/")
 async def chat_with_agent(request: ChatRequest):
+    """ main chat route """
     try:
         result = app.invoke({"query": request.query}) # type: ignore
         return {"response": result["answer"], "category": result.get("category")}

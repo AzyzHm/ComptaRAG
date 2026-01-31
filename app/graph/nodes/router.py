@@ -5,7 +5,7 @@ from app.config.prompts import router_prompt
 
 def route_query(user_query : str) -> str:
     """
-    Routes the user query using Gemini Flash to decide which database to search.
+    Routes the user query using an LLM to decide which database to search.
     """
     try:
         response = getResponseFromLLM(router_prompt,user_query,0.0)

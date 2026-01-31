@@ -4,6 +4,7 @@ from app.config.prompts import expert_prompt_v1,expert_prompt_v2
 
 
 def generate_answer_node(state: GraphState):
+    """ Generate a final answer for the query """
     context = state.get("context", "")
     query = state.get("query", "")
     category = state.get("category", "general_knowledge")

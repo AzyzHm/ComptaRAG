@@ -11,6 +11,7 @@ from app.config.models import warm_up_embedding_model
 
 
 def decide_next_node(state: GraphState):
+    """ Decide which node to go based on the state's category attribute """
     if state["category"] == "web_search":
         return "web_search"
     elif state["category"] == "general_knowledge":

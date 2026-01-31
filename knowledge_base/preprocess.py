@@ -3,11 +3,13 @@ import json
 import os
 
 def clean_text(text : str) -> str:
+    """ Clean strings from any innecessary characters """
     text = text.replace("\n", " ") # replace all new line characters with spaces.
     text = re.sub(r'\s+', ' ', text) # replace any sequence of spaces into a single one.
     return text.strip()
 
 def chunk_text(text : str, chunk_size:int=800, overlap:int=150) -> list[str]:
+    """ transforms a given string into sized chunks """
     chunks = []
     start = 0
     while start < len(text):
@@ -19,6 +21,7 @@ def chunk_text(text : str, chunk_size:int=800, overlap:int=150) -> list[str]:
     return chunks
 
 def preprocess_text(input_folder: str, output_folder: str, category: str) -> None:
+    """ preprocess text files in a given folder """
     os.makedirs(output_folder, exist_ok=True)
 
     for file in os.listdir(input_folder):
@@ -44,11 +47,6 @@ def preprocess_text(input_folder: str, output_folder: str, category: str) -> Non
 
 if __name__ == '__main__':
 
-    # preprocess ifrs text
     preprocess_text("knowledge_base/extracted_text/ifrs", "knowledge_base/processed_chunks/ifrs","ifrs")
-    
-    # preprocess tax_code text
     preprocess_text("knowledge_base/extracted_text/tax_code", "knowledge_base/processed_chunks/tax_code","tax_code")
-
-    # preprocess accounting standards text
     preprocess_text("knowledge_base/extracted_text/accounting_standards", "knowledge_base/processed_chunks/accounting_standards","accounting_standards")
