@@ -30,7 +30,12 @@ This project aims to help professional people in tunisia find answers to their a
     pip install -r requirements.txt
     ```
 
-2. Create a .env file to store env variables (APIs).
+2. Create a .env file to store env variables (APIs), it should look like this :
+
+    ```env
+    gemini_api_key=<api_key>
+    tavily_api_key=<api_key>
+    ```
 
 ### Running the app (local):
 
