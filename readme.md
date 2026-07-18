@@ -28,6 +28,8 @@ This project aims to help professional people in tunisia find answers to their a
     ```powershell
     python -m venv venv
     pip install -r requirements.txt
+    For notebook/experimentation work, also install:
+    pip install -r requirements-dev.txt
     ```
 
 2. Create a .env file to store env variables (APIs), it should look like this :
