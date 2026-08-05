@@ -1,7 +1,7 @@
 import json
-from app.config.models import getResponseFromLLM
-from app.graph.state import GraphState
-from app.config.prompts import router_prompt
+from backend.config.models import getResponseFromLLM
+from backend.graph.state import GraphState
+from backend.config.prompts import router_prompt
 
 def route_query(user_query : str) -> str:
     """

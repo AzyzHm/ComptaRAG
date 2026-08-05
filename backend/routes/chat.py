@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from app.graph.workflow import app
+from backend.graph.workflow import app
 
 router = APIRouter(prefix="/chat", tags=["Chat"])
 

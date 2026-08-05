@@ -1,6 +1,6 @@
-from app.graph.state import GraphState
-from app.config.models import getResponseFromLLM
-from app.config.prompts import expert_prompt_v1,expert_prompt_v2
+from backend.graph.state import GraphState
+from backend.config.models import getResponseFromLLM
+from backend.config.prompts import expert_prompt_v1,expert_prompt_v2
 
 
 def generate_answer_node(state: GraphState):
