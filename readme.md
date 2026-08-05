@@ -1,168 +1,105 @@
-# AI Accounting Assistant
+<p align="center">
+  <img src="assets/ComptaRAG_banner_Image.png" alt="ComptaRAG banner" width="100%">
+</p>
 
-## 1. Project Objectif
-This project aims to help professional people in tunisia find answers to their accounting questions by using the power of agentic rag.
+<p align="center">
+  <img src="https://img.shields.io/badge/Angular-DD0031?style=flat&logo=angular&logoColor=white" alt="Angular">
+  <img src="https://img.shields.io/badge/Spring%20Boot-6DB33F?style=flat&logo=springboot&logoColor=white" alt="Spring Boot">
+  <img src="https://img.shields.io/badge/FastAPI-009688?style=flat&logo=fastapi&logoColor=white" alt="FastAPI">
+  <img src="https://img.shields.io/badge/RabbitMQ-FF6600?style=flat&logo=rabbitmq&logoColor=white" alt="RabbitMQ">
+  <img src="https://img.shields.io/badge/Firebase-FFCA28?style=flat&logo=firebase&logoColor=black" alt="Firebase">
+  <img src="https://img.shields.io/badge/ChromaDB-4B0082?style=flat" alt="ChromaDB">
+  <img src="https://img.shields.io/badge/LangGraph-1C3C3C?style=flat" alt="LangGraph">
+  <img src="https://img.shields.io/badge/Gemini-8E75B2?style=flat&logo=googlegemini&logoColor=white" alt="Gemini">
+  <img src="https://img.shields.io/badge/Tavily-000000?style=flat" alt="Tavily">
+  <img src="https://img.shields.io/badge/Jina%20Reranker-000000?style=flat&logo=jinja&logoColor=white" alt="Jina Reranker">
+  <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="Apache 2.0 License">
+</p>
+
+<p align="center">
+  🚧 <strong>Active development — this project is in a dev/pre-release phase.</strong><br>
+  The architecture is currently being migrated to a multi-service design (see below). Expect breaking changes, incomplete features, and evolving documentation until a first stable tag is cut.
+</p>
 
 ---
 
-## 2. Technologies Used
+## 1. Project Objective
 
-- **FastAPI**: Backend API framework for serving chat and retrieval endpoints.
-- **Streamlit**: Frontend framework for building the interactive chat UI.
-- **ChromaDB**: Vector database for storing and retrieving document embeddings.
-- **Ollama**: Runs the local embedding model (`embeddinggemma`) for document and query embeddings.
-- **Gemini API**: Accesses the `gemini-2.5-flash` LLM for answer generation and query routing.
-- **Tavily API**: Provides web search capabilities to supplement local knowledge.
+ComptaRAG is an agentic RAG assistant that helps people especially professionals in Tunisia get grounded answers to accounting and financial-law questions, combining IFRS knowledge with Tunisian tax and accounting regulations.
 
-## 3. Architecture
+## 2. What's changing (dev phase)
 
-![Architecture Diagram](assets/architecture.png)
+The project is moving from a 2-piece app (Streamlit + FastAPI) to a proper 3-service architecture:
 
----
+- **Angular frontend** : replaces Streamlit; adds authentication, an admin panel, and a richer chat experience.
+- **FastAPI service** : trimmed down to just the agentic RAG pipeline (retrieval, reranking, generation).
+- **Spring Boot service** : new; handles authentication and user management with three roles (super admin, admin, user), backed by Firebase (Firestore + Firebase Auth).
+- **RabbitMQ** : connects the two backend services asynchronously (user lifecycle events, usage/audit logging).
 
-## 4. Installation & Setup
+Alongside the architecture change, the RAG pipeline itself is being upgraded with:
 
-### Getting Started :
+- **Conversation history** : the assistant now remembers and uses past turns in a conversation.
+- **Selectable retrieval mode** : choose keyword search (BM25), semantic search, or a hybrid of both.
+- **Reranking** : retrieved chunks are reranked with `jina-reranker-v2-base` before being used as context.
+- **Query refinement** : the user's question is rewritten/clarified before retrieval, including resolving it against conversation history.
+- **Iterative retrieval loop** : if retrieved context is judged insufficient, the assistant refines the query and retrieves again (up to two passes) before falling back to a live web search.
 
-1. First Setup a virtual environment and install dependencies using this command :
-    ```powershell
-    python -m venv venv
-    pip install -r requirements.txt
-    For notebook/experimentation work, also install:
-    pip install -r requirements-dev.txt
-    ```
+> Note: this README intentionally does not include code-level documentation yet , that will be added once the new architecture stabilizes. See the [Contributing](#contributing) section if you'd like to help.
 
-2. Create a .env file to store env variables (APIs), it should look like this :
+## 3. Current (legacy) architecture
 
-    ```env
-    gemini_api_key=<api_key>
-    tavily_api_key=<api_key>
-    ```
+The diagram below reflects the *original* Streamlit + FastAPI version, kept here for reference while the migration is in progress. An updated architecture diagram will replace it once the new services are in place.
 
-### Running the app (local):
+[![Architecture Diagram](assets/architecture.png)](assets/architecture.png)
 
-Make sure to run this command in the terminal before doing anything:
-```powershell
+## 4. Legacy Installation & Setup
+
+These instructions apply to the current `dev` branch (pre-migration). They will change once the new services land.
+
+```
+python -m venv venv
+pip install -r requirements.txt
+```
+
+For notebook/experimentation work, also install:
+
+```
+pip install -r requirements-dev.txt
+```
+
+Create a `.env` file with:
+
+```
+gemini_api_key=<api_key>
+tavily_api_key=<api_key>
+```
+
+Run (PowerShell):
+
+```
 $env:PYTHONPATH = "."
 ```
 
-#### FrontEnd :
-```powershell
+Frontend:
+
+```
 streamlit run .\frontend\main.py
 ```
 
-#### Backend :
-```powershell
+Backend:
+
+```
 python -m uvicorn app.main:app --reload
 ```
 
----
+## 5. Contributing
 
-## 5. Project Structure
+Contributions are welcome, especially during this migration. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening an issue or pull request, and follow our [Code of Conduct](CODE_OF_CONDUCT.md).
 
-```
-AI-Accounting-Assistant/
-│
-├── app/                          # FastAPI backend (main API logic)
-│   ├── main.py                   # API entrypoint
-│   ├── config/
-│   │   ├── models.py             # LLM and embedding model utilities
-│   │   ├── api_keys.py           # Initializing Models API Keys
-│   │   └── prompts.py            # Prompt templates for LLM
-│   ├── graph/
-│   │   ├── state.py              # Graph state definition
-│   │   ├── workflow.py           # Orchestration logic for query pipeline
-│   │   └── nodes/
-│   │       ├── generate.py       # Node for generating answers
-│   │       ├── router.py         # Node for routing nodes
-│   │       ├── validate.py       # Node for validating context
-│   │       ├── web_search.py     # Node for searching the web for context
-│   │       └── retrieve.py       # Node for retrieving context from DB
-│   ├── routes/
-│   │   └── chat.py               # Chat API route
-│   └── services/
-│       ├── search_service.py     # Tavily Search Service
-│       └── chroma_service.py     # ChromaDB collection/service
-│
-├── frontend/                     # Streamlit frontend (UI)
-│   └── main.py
-│
-├── knowledge_base/               # Data processing and embedding
-│   ├── documents/                # Raw PDF documents
-│   ├── extracted_text/           # Extracted text from PDFs
-│   ├── processed_chunks/         # Chunked and cleaned text
-│   ├── chroma_db/                # ChromaDB persistent storage
-│   ├── extract_text.py           # PDF text extraction
-│   ├── preprocess.py             # Text cleaning & chunking
-│   └── create_db.py              # Embedding & DB ingestion
-│
-├── assets/                          # Documentation assets
-│   └── architecture.png
-│
-├── requirements.txt              # Python dependencies
-├── .env                          # Environment variables (user-created)
-└── readme.md                     # Project documentation
-```
----
+## 6. Security
 
-## 6. Core Concepts
+Found a serious vulnerability? Please don't open a public issue — see [SECURITY.md](SECURITY.md) for how to report it responsibly.
 
-- **Document Extraction**: PDF files are processed using [`knowledge_base/extract_text.py`](knowledge_base/extract_text.py) to extract raw text into `.txt` files.
-- **Text Preprocessing**: Text files are cleaned and split into manageable chunks via [`knowledge_base/preprocess.py`](knowledge_base/preprocess.py), producing `.jsonl` files for each document.
-- **Embedding & Database**: Chunks are embedded using a local model and stored in a persistent vector database (ChromaDB) via [`knowledge_base/create_db.py`](knowledge_base/create_db.py).
-- **Backend API**: The FastAPI backend (`app/main.py`) receives user queries, retrieves relevant chunks from the vector DB, and generates answers using an LLM.
-- **Frontend UI**: The Streamlit frontend (`frontend/main.py`) provides a chat interface for users to interact with the assistant.
-- **Classification**: Each answer is categorized (e.g., IFRS, Tax_code...) for context-aware responses.
+## 7. License
 
----
-
-## 7. testing queries :
-1. Under IFRS, what conditions must be met to recognize a provision, and how does this differ from contingent liabilities? (IFRS)
-
-2. Comment est déterminé le résultat fiscal à partir du résultat comptable selon la législation tunisienne ? (Fiscalité tunisienne)
-
-3. How does IFRS 15 allocate the transaction price in a contract with multiple performance obligations? (IFRS)
-
-4. Comment la TVA est-elle traitée sur les exportations de biens et les services internationaux en Tunisie ? (Fiscalité tunisienne)
-
-5. How should a USD-denominated trade receivable be remeasured at year-end under IAS 21? (IFRS / Foreign currency)
-
-6. Une provision comptabilisée selon IAS 37 mais non déductible fiscalement en Tunisie : quel est l’impact en matière d’impôt différé ? (IFRS / Fiscalité tunisienne)
-
-7. How does IFRS define control for the purpose of consolidating a subsidiary? (IFRS)
-
-8. Quelles charges sont considérées comme non déductibles fiscalement en Tunisie ? (Fiscalité tunisienne)
-
-9. What is the difference between a change in accounting policy and a change in accounting estimate under IFRS? (IFRS)
-
-10. Une entreprise tunisienne facture en euros : comment les écarts de change sont-ils traités comptablement et fiscalement ? (IFRS / Fiscalité tunisienne)
-
-11. How are financial assets classified and measured under IFRS 9? (IFRS)
-
-12. Comment est calculé l’impôt sur les sociétés en Tunisie pour une société résidente ? (Fiscalité tunisienne)
-
-13. What is the current EUR/TND exchange rate, and how would it affect the valuation of foreign currency balances? (Live exchange rates)
-
-14. Une subvention d’investissement reçue par une entreprise tunisienne : traitement comptable IFRS et traitement fiscal ? (IFRS / Fiscalité tunisienne)
-
-15. How does IFRS treat the subsequent measurement of investment property under IAS 40? (IFRS)
-
-16. Comment sont traitées fiscalement les provisions pour risques et charges en Tunisie ? (Fiscalité tunisienne)
-
-17. If the Tunisian dinar depreciates after the reporting date, is this an adjusting or non-adjusting event under IFRS? (IFRS / Events after reporting period)
-
-18. Une facture fournisseur en devise est réglée après la clôture : quel est le traitement comptable selon IAS 21 ? (IFRS / Foreign currency)
-
-19. How is VAT applied to imported goods in Tunisia? (Fiscalité tunisienne)
-
-20. Under IFRS 16, how is a lease liability initially measured? (IFRS)
-
-21. Une entreprise applique les IFRS mais est soumise à la loi fiscale tunisienne : que faire en cas de divergence entre les deux ? (IFRS / Fiscalité tunisienne)
-
-22. How are deferred tax assets recognized under IAS 12, and what evidence is required? (IFRS)
-
-23. Comment sont imposés les revenus de source étrangère pour une société tunisienne ? (Fiscalité tunisienne)
-
-24. How do exchange rate fluctuations impact profit or loss under IFRS? (IFRS / Foreign currency)
-
-25. Une entreprise tunisienne exportatrice réalise des ventes exonérées de TVA : quel est l’impact sur le droit à déduction ? (Fiscalité tunisienne)
+This project is licensed under the [Apache License 2.0](LICENSE).
