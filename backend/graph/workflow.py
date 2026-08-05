@@ -1,13 +1,13 @@
 from langgraph.graph import StateGraph, END
 
-from app.graph.state import GraphState
-from app.graph.nodes.router import router_node
-from app.graph.nodes.retrieve import retrieval_node
-from app.graph.nodes.web_search import web_search_node
-from app.graph.nodes.validate import validate_node
-from app.graph.nodes.generate import generate_answer_node
+from backend.graph.state import GraphState
+from backend.graph.nodes.router import router_node
+from backend.graph.nodes.retrieve import retrieval_node
+from backend.graph.nodes.web_search import web_search_node
+from backend.graph.nodes.validate import validate_node
+from backend.graph.nodes.generate import generate_answer_node
 
-from app.config.models import warm_up_embedding_model
+from backend.config.models import warm_up_embedding_model
 
 
 def decide_next_node(state: GraphState):

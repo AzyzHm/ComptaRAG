@@ -1,6 +1,6 @@
-from app.graph.state import GraphState
-from app.config.models import getResponseFromLLM
-from app.config.prompts import validator_prompt
+from backend.graph.state import GraphState
+from backend.config.models import getResponseFromLLM
+from backend.config.prompts import validator_prompt
 import json
 
 def validate_node(state: GraphState):

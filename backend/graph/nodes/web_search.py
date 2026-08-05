@@ -1,5 +1,5 @@
-from app.services.search_service import search_web
-from app.graph.state import GraphState
+from backend.services.search_service import search_web
+from backend.graph.state import GraphState
 
 def web_search_node(state: GraphState):
     """ uses the web search service """
