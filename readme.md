@@ -54,7 +54,7 @@ The diagram below reflects the *original* Streamlit + FastAPI version, kept here
 
 ## 4. Legacy Installation & Setup
 
-These instructions apply to the current `dev` branch (pre-migration). They will change once the new services land.
+These instructions apply to the current `main` branch (pre-migration). They will change once the new services land.
 
 ```
 python -m venv venv
@@ -98,8 +98,8 @@ Contributions are welcome, especially during this migration. Please read [CONTRI
 
 ## 6. Security
 
-Found a serious vulnerability? Please don't open a public issue — see [SECURITY.md](SECURITY.md) for how to report it responsibly.
+Found a serious vulnerability? Please don't open a public issue see [SECURITY.md](SECURITY.md) for how to report it responsibly.
 
 ## 7. License
 
-This project is licensed under the [Apache License 2.0](LICENSE).
+This project is licensed under the [Apache License 2.0](LICENCE).
