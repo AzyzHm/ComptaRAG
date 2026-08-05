@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  🚧 <strong>Active development — this project is in a dev/pre-release phase.</strong><br>
+  🚧 <strong>Active development, this project is in a dev/pre-release phase.</strong><br>
   The architecture is currently being migrated to a multi-service design (see below). Expect breaking changes, incomplete features, and evolving documentation until a first stable tag is cut.
 </p>
 
