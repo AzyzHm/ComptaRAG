@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/ComptaRAG_banner_Image.png" alt="ComptaRAG banner" width="100%">
+  <img src="backend/assets/ComptaRAG_banner_Image.png" alt="ComptaRAG banner" width="100%">
 </p>
 
 <p align="center">
