@@ -1,6 +1,6 @@
 import ollama
-from backend.services.chroma_service import collection
-from backend.graph.state import GraphState
+from services.chroma_service import collection
+from graph.state import GraphState
 
 def retrieve_context(query: str, category, n_results: int = 5):
     """

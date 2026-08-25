@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from backend.routes import chat
-from backend.config.models import warm_up_embedding_model
+from routes import chat
+from config.models import warm_up_embedding_model
 
 app = FastAPI(title="Accounting Agent API")
 
