@@ -1,0 +1,36 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+.composer {
+  display: flex;
+  align-items: flex-end;
+  gap: $spacing-sm;
+  padding: $spacing-md $spacing-lg;
+  background-color: $color-paper-raised;
+  border-top: 1px solid $color-rule;
+}
+
+.composer__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+.composer__input {
+  flex: 1;
+  resize: none;
+  padding: $spacing-sm $spacing-md;
+  border-radius: $radius-md;
+  border: 1px solid $color-rule;
+  background-color: $color-paper;
+  color: $color-ink;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  @include focus-ring;
+
+  &:disabled {
+    opacity: 0.6;
+  }
+}

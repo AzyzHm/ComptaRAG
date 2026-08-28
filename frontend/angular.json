@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "angular-custom-template": {
+    "comptarag-frontend": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -19,7 +19,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/angular-custom-template",
+            "outputPath": "dist/comptarag-frontend",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [],
@@ -42,7 +42,12 @@
                   "maximumError": "8kb"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "optimization": {
+                "scripts": true,
+                "styles": true,
+                "fonts": false
+              }
             },
             "development": {
               "optimization": false,
@@ -56,8 +61,8 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
-            "production": { "buildTarget": "angular-custom-template:build:production" },
-            "development": { "buildTarget": "angular-custom-template:build:development" }
+            "production": { "buildTarget": "comptarag-frontend:build:production" },
+            "development": { "buildTarget": "comptarag-frontend:build:development" }
           },
           "defaultConfiguration": "development"
         },

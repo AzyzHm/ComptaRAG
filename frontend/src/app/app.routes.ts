@@ -3,7 +3,7 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
-    loadChildren: () => import('@features/home/home.routes').then((m) => m.HOME_ROUTES)
+    loadChildren: () => import('@features/chat/chat.routes').then((m) => m.CHAT_ROUTES)
   },
   {
     path: '**',

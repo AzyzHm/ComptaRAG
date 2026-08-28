@@ -6,6 +6,7 @@ describe('AppComponent', () => {
   it('renders the header and footer', async () => {
     await render(AppComponent);
 
-    expect(screen.getByText('Angular Custom Template')).toBeTruthy();
+    expect(screen.getByText('ComptaRAG')).toBeTruthy();
+    expect(screen.getByText(/informational, not professional/i)).toBeTruthy();
   });
 });

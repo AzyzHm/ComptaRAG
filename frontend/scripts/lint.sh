@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# Runs the same lint + format checks enforced in CI.
 set -euo pipefail
 
 echo "==> ESLint"

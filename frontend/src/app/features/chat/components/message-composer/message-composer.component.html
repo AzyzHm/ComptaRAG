@@ -1,0 +1,17 @@
+<form class="composer" (ngSubmit)="submit()">
+  <label for="composer-input" class="composer__label">Ask a question</label>
+  <textarea
+    id="composer-input"
+    class="composer__input"
+    name="query"
+    rows="2"
+    placeholder="e.g. Comment est déterminé le résultat fiscal à partir du résultat comptable ?"
+    [ngModel]="draft()"
+    (ngModelChange)="draft.set($event)"
+    [disabled]="disabled"
+    (keydown.enter)="onEnter($event)"
+  ></textarea>
+  <app-button type="submit" [disabled]="disabled || !draft().trim()">
+    {{ disabled ? 'Asking…' : 'Ask' }}
+  </app-button>
+</form>

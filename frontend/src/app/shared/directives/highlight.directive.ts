@@ -1,9 +1,5 @@
 import { Directive, ElementRef, HostListener, Input, inject } from '@angular/core';
 
-/**
- * Applies a background highlight on hover. Example of a simple,
- * reusable attribute directive.
- */
 @Directive({
   selector: '[appHighlight]',
   standalone: true

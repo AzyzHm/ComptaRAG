@@ -4,11 +4,6 @@ import { Observable } from 'rxjs';
 
 import { environment } from '@env/environment';
 
-/**
- * Thin wrapper around HttpClient that centralizes the API base URL.
- * Feature services should build on top of this rather than injecting
- * HttpClient directly, so the base URL only lives in one place.
- */
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private readonly http = inject(HttpClient);

@@ -1,8 +1,8 @@
 {
-  "name": "angular-custom-template",
+  "name": "comptarag-frontend",
   "version": "1.0.0",
-  "description": "A minimal, well-structured, production-ready Angular frontend template - standalone components, signal-based state, test-covered, and CI-ready out of the box.",
-  "license": "MIT",
+  "description": "ComptaRAG frontend: Angular chat UI for the agentic RAG assistant, IFRS and Tunisian fiscal law questions.",
+  "license": "Apache-2.0",
   "scripts": {
     "start": "ng serve",
     "build": "ng build",
