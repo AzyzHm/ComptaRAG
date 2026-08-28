@@ -6,13 +6,6 @@ import { provideHttpClientTesting, HttpTestingController } from '@angular/common
 
 import { ChatComponent } from '@features/chat/chat.component';
 
-/**
- * Integration test: renders the real ChatComponent together with its real
- * children (message list, composer, category badge) and the real
- * ChatApiService/ApiService. Only the network boundary is mocked, via
- * HttpTestingController, matching the template's "no collaborator mocking"
- * convention for integration tests.
- */
 describe('Chat feature (integration)', () => {
   it('sends a question, shows it immediately, then renders the categorized answer', async () => {
     await render(ChatComponent, {
