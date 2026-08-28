@@ -1,0 +1,23 @@
+// Design tokens shared across the app.
+// Import with: @use 'styles/variables' as *;
+
+$color-primary: #3f51b5;
+$color-primary-dark: #303f9f;
+$color-background: #fafafa;
+$color-text: #1a1a1a;
+$color-muted: #6b7280;
+$color-border: #e5e7eb;
+$color-danger: #dc2626;
+
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 40px;
+
+$radius-sm: 4px;
+$radius-md: 8px;
+
+$breakpoint-sm: 576px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 1024px;

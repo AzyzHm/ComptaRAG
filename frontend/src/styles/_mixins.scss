@@ -1,0 +1,14 @@
+// Reusable mixins shared across component styles.
+// Import with: @use 'styles/mixins' as *;
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin respond-above($breakpoint) {
+  @media (min-width: $breakpoint) {
+    @content;
+  }
+}

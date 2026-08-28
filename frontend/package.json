@@ -1,32 +1,70 @@
 {
-  "name": "frontend",
-  "version": "0.0.0",
+  "name": "angular-custom-template",
+  "version": "1.0.0",
+  "description": "A minimal, well-structured, production-ready Angular frontend template - standalone components, signal-based state, test-covered, and CI-ready out of the box.",
+  "license": "MIT",
   "scripts": {
-    "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:prod": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "jest",
+    "test:unit": "jest --testPathPattern=tests/unit",
+    "test:integration": "jest --testPathPattern=tests/integration",
+    "test:coverage": "jest --coverage",
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui",
+    "lint": "eslint \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "lint:fix": "eslint \"src/**/*.ts\" \"tests/**/*.ts\" --fix",
+    "format": "prettier --write \"src/**/*.{ts,html,scss}\" \"tests/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.{ts,html,scss}\" \"tests/**/*.ts\"",
+    "prepare": "husky"
   },
   "private": true,
-  "packageManager": "npm@12.0.2",
   "dependencies": {
-    "@angular/common": "^22.1.0",
-    "@angular/compiler": "^22.1.0",
-    "@angular/core": "^22.1.0",
-    "@angular/forms": "^22.1.0",
-    "@angular/platform-browser": "^22.1.0",
-    "@angular/router": "^22.1.0",
-    "rxjs": "~7.8.0",
-    "tslib": "^2.3.0"
+    "@angular/animations": "^21.2.19",
+    "@angular/common": "^21.2.19",
+    "@angular/compiler": "^21.2.19",
+    "@angular/core": "^21.2.19",
+    "@angular/forms": "^21.2.19",
+    "@angular/platform-browser": "^21.2.19",
+    "@angular/platform-browser-dynamic": "^21.2.19",
+    "@angular/router": "^21.2.19",
+    "rxjs": "^7.8.1",
+    "tslib": "^2.6.2"
   },
   "devDependencies": {
-    "@angular/build": "^22.1.5",
-    "@angular/cli": "^22.1.5",
-    "@angular/compiler-cli": "^22.1.0",
-    "jsdom": "^28.0.0",
-    "prettier": "^3.8.1",
-    "typescript": "~6.0.2",
-    "vitest": "^4.0.8"
+    "@angular-devkit/build-angular": "^21.0.0",
+    "@angular-eslint/builder": "^21.0.0",
+    "@angular-eslint/schematics": "^21.0.0",
+    "@angular/cli": "^21.2.20",
+    "@angular/compiler-cli": "^21.2.19",
+    "@playwright/test": "^1.48.0",
+    "@testing-library/angular": "^19.4.2",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/user-event": "^14.6.5",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^26.2.0",
+    "angular-eslint": "^21.0.0",
+    "eslint": "^9.13.0",
+    "eslint-config-prettier": "^10.1.8",
+    "husky": "^9.1.6",
+    "jest": "^30.0.0",
+    "jest-environment-jsdom": "^30.0.0",
+    "jest-preset-angular": "^17.0.0",
+    "lint-staged": "^17.3.0",
+    "prettier": "^3.3.3",
+    "ts-node": "^10.9.2",
+    "typescript": "~5.9.0",
+    "typescript-eslint": "^8.67.0"
+  },
+  "lint-staged": {
+    "*.{ts}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{html,scss,json,md}": [
+      "prettier --write"
+    ]
   }
 }

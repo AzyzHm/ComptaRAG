@@ -1,0 +1,10 @@
+<button
+  [type]="type"
+  class="app-button"
+  [class.app-button--secondary]="variant === 'secondary'"
+  [class.app-button--danger]="variant === 'danger'"
+  [disabled]="disabled"
+  (click)="onClick($event)"
+>
+  <ng-content></ng-content>
+</button>

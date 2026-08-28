@@ -1,0 +1,15 @@
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as *;
+
+.app-header {
+  @include flex-center;
+  justify-content: flex-start;
+  padding: $spacing-md $spacing-lg;
+  border-bottom: 1px solid $color-border;
+
+  &__brand {
+    font-weight: 700;
+    color: $color-text;
+    text-decoration: none;
+  }
+}
