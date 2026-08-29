@@ -1,0 +1,30 @@
+<div class="message-list" role="log" aria-live="polite">
+  @if (messages.length === 0) {
+    <div class="message-list__empty">
+      <h1>Ask ComptaRAG</h1>
+      <p>
+        Get a grounded answer on IFRS or Tunisian fiscal law, questions in French or English are
+        both fine.
+      </p>
+    </div>
+  }
+
+  @for (message of messages; track message.id) {
+    <article class="entry" [class.entry--assistant]="message.role === 'assistant'">
+      @if (message.role === 'user') {
+        <p class="entry__query">{{ message.content }}</p>
+      } @else {
+        <div class="entry__answer">
+          <app-category-badge [category]="message.category" />
+          <p class="entry__answer-text">{{ message.content }}</p>
+        </div>
+      }
+    </article>
+  }
+
+  @if (pending) {
+    <p class="message-list__pending" aria-live="polite">
+      ComptaRAG is checking the sources&hellip;
+    </p>
+  }
+</div>

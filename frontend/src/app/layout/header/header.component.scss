@@ -1,0 +1,29 @@
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as *;
+
+.app-header {
+  @include flex-center;
+  justify-content: flex-start;
+  gap: $spacing-md;
+  padding: $spacing-md $spacing-lg;
+  background-color: $color-paper-raised;
+  border-bottom: 1px solid $color-rule;
+
+  &__brand {
+    font-family: $font-display;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: $color-ink;
+    text-decoration: none;
+    @include focus-ring;
+  }
+
+  &__tagline {
+    font-size: 0.8125rem;
+    color: $color-ink-muted;
+
+    @media (max-width: $breakpoint-sm) {
+      display: none;
+    }
+  }
+}

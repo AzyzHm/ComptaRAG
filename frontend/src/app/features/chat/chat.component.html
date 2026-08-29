@@ -1,0 +1,9 @@
+<section class="chat">
+  <app-message-list [messages]="messages()" [pending]="pending()" />
+
+  @if (error()) {
+    <p class="chat__error" role="alert">{{ error() }}</p>
+  }
+
+  <app-message-composer [disabled]="pending()" (submitted)="submitQuery($event)" />
+</section>
