@@ -19,7 +19,9 @@
     "typecheck": "tsc -p tsconfig.spec.json --noEmit",
     "format": "prettier --write \"src/**/*.{ts,html,scss}\" \"tests/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.{ts,html,scss}\" \"tests/**/*.ts\"",
-    "prepare": "husky"
+    "prepare": "husky",
+    "audit": "npm audit --omit=dev",
+    "audit:full": "npm audit"
   },
   "private": true,
   "dependencies": {
