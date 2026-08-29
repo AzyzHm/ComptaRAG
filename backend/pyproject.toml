@@ -1,0 +1,75 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "comptarag-backend"
+version = "0.1.0"
+description = "FastAPI backend for the ComptaRAG agentic RAG assistant"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.128,<0.129",
+    "uvicorn[standard]>=0.38,<0.39",
+    "pydantic>=2.12,<3",
+    "python-dotenv>=1.2,<2",
+    "ollama>=0.6,<0.7",
+    "google-genai>=1.52,<2",
+    "chromadb>=1.3,<2",
+    "langgraph>=1.0,<2",
+    "tavily-python>=0.7,<0.8",
+    "pypdf>=6.3,<7",
+]
+
+# This package ships no importable code of its own, config/graph/routes/services
+# are imported directly (as they already are at runtime via "uvicorn main:app"
+# run from inside backend/), pyproject.toml here only pins dependencies and
+# centralizes tool config.
+[tool.setuptools]
+packages = []
+
+[project.optional-dependencies]
+test = [
+    "pytest>=8.3,<9",
+    "pytest-asyncio>=0.24,<0.25",
+    "pytest-mock>=3.14,<4",
+    "pytest-cov>=6.0,<7",
+    "httpx>=0.28,<1",
+]
+dev = [
+    "comptarag-backend[test]",
+    "ruff>=0.8,<1",
+    "mypy>=1.13,<2",
+]
+notebook = [
+    "ipykernel>=7.1,<8",
+    "jupyter>=1.1,<2",
+    "torch>=2.9,<3",
+    "transformers>=4.57,<5",
+    "sentence-transformers>=5.1,<6",
+    "scikit-learn>=1.7,<2",
+    "scipy>=1.16,<2",
+]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+pythonpath = ["."]
+asyncio_mode = "auto"
+addopts = "-ra --cov=. --cov-report=term-missing"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["notebook"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+check_untyped_defs = true
+no_implicit_optional = true
+exclude = ["notebook/"]
