@@ -16,6 +16,7 @@
     "e2e:ui": "playwright test --ui",
     "lint": "eslint \"src/**/*.ts\" \"tests/**/*.ts\"",
     "lint:fix": "eslint \"src/**/*.ts\" \"tests/**/*.ts\" --fix",
+    "typecheck": "tsc -p tsconfig.spec.json --noEmit",
     "format": "prettier --write \"src/**/*.{ts,html,scss}\" \"tests/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.{ts,html,scss}\" \"tests/**/*.ts\"",
     "prepare": "husky"
@@ -66,5 +67,10 @@
     "*.{html,scss,json,md}": [
       "prettier --write"
     ]
+  },
+  "overrides": {
+    "sockjs": {
+      "uuid": "^11.1.1"
+    }
   }
 }
