@@ -1,23 +1,23 @@
-from langgraph.graph import StateGraph, END
-
-from graph.state import GraphState
-from graph.nodes.router import router_node
-from graph.nodes.retrieve import retrieval_node
-from graph.nodes.web_search import web_search_node
-from graph.nodes.validate import validate_node
-from graph.nodes.generate import generate_answer_node
+from langgraph.graph import END, StateGraph
 
 from config.models import warm_up_embedding_model
+from graph.nodes.generate import generate_answer_node
+from graph.nodes.retrieve import retrieval_node
+from graph.nodes.router import router_node
+from graph.nodes.validate import validate_node
+from graph.nodes.web_search import web_search_node
+from graph.state import GraphState
 
 
 def decide_next_node(state: GraphState):
-    """ Decide which node to go based on the state's category attribute """
+    """Decide which node to go based on the state's category attribute"""
     if state["category"] == "web_search":
         return "web_search"
     elif state["category"] == "general_knowledge":
         return "generate"
     else:
         return "retrieve"
+
 
 def post_val_routing(state: GraphState):
     """
@@ -42,22 +42,13 @@ workflow.set_entry_point("router")
 workflow.add_conditional_edges(
     "router",
     decide_next_node,
-    {
-        "web_search": "web_search",
-        "generate": "generate",
-        "retrieve": "retrieve"
-    }
+    {"web_search": "web_search", "generate": "generate", "retrieve": "retrieve"},
 )
 
 workflow.add_edge("retrieve", "validate")
 
 workflow.add_conditional_edges(
-    "validate",
-    post_val_routing,
-    {
-        "generate": "generate",
-        "web_search": "web_search"
-    }
+    "validate", post_val_routing, {"generate": "generate", "web_search": "web_search"}
 )
 
 workflow.add_edge("web_search", "generate")
@@ -67,10 +58,12 @@ app = workflow.compile()
 
 if __name__ == "__main__":
     warm_up_embedding_model()
-    test_input = {"query": "Under IFRS, what criteria must be met for an asset to be recognized on the statement of financial position?"}
+    test_input = {
+        "query": "Under IFRS, what criteria must be met for an asset to be recognized on the statement of financial position?"
+    }
 
     try:
-        final_state = app.invoke(test_input) # type: ignore
+        final_state = app.invoke(test_input)  # type: ignore
         print("Answer:", final_state["answer"])
     except Exception as e:
         print(f"Execution Error: {e}")

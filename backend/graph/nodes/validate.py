@@ -1,22 +1,24 @@
-from graph.state import GraphState
-from config.models import getResponseFromLLM
-from config.prompts import validator_prompt
 import json
 
+from config.models import getResponseFromLLM
+from config.prompts import validator_prompt
+from graph.state import GraphState
+
+
 def validate_node(state: GraphState):
-    """ Validate the context before augmenting the final answer """
+    """Validate the context before augmenting the final answer"""
 
     if state["category"] == "general_knowledge":
         return {"is_valid": True}
 
-    user_input = f"USER QUERY: {state["query"]}\n\nRETRIEVED CONTEXT: {state["context"]}"
-    
+    user_input = f"USER QUERY: {state['query']}\n\nRETRIEVED CONTEXT: {state['context']}"
+
     try:
         response = getResponseFromLLM(validator_prompt, user_input, 0.0)
         if response.text is None:
             raise ValueError("LLM Response is empty")
         result = json.loads(response.text)
-        
+
         is_valid = result.get("is_valid", False)
         return {"is_valid": is_valid}
     except Exception as e:
