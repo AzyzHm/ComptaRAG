@@ -1,6 +1,12 @@
 /.venv
 .env
+.coverage
+
+
 comptarag-firebase*.json
+
+
+
 knowledge_base/documents/*
 knowledge_base/chromadb/*
 knowledge_base/extracted_text/*

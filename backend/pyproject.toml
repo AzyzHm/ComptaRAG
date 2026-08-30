@@ -30,8 +30,6 @@ packages = []
 [project.optional-dependencies]
 test = [
     "pytest>=8.3,<9",
-    "pytest-asyncio>=0.24,<0.25",
-    "pytest-mock>=3.14,<4",
     "pytest-cov>=6.0,<7",
     "httpx>=0.28,<1",
 ]
@@ -50,20 +48,37 @@ notebook = [
     "scipy>=1.16,<2",
 ]
 
-[tool.pytest.ini_options]
-minversion = "8.0"
-testpaths = ["tests"]
-pythonpath = ["."]
-asyncio_mode = "auto"
-addopts = "-ra --cov=. --cov-report=term-missing"
-
 [tool.ruff]
 line-length = 100
 target-version = "py312"
 extend-exclude = ["notebook"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B", "SIM"]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "SIM", # flake8-simplify
+]
+ignore = [
+    "E501", # line length is handled by the formatter, not worth failing CI over
+]
+
+[tool.ruff.lint.per-file-ignores]
+# __init__.py files re-export names as a package's public surface on purpose.
+"__init__.py" = ["F401"]
+# mock_modules is imported purely for its side effect (stubbing third-party
+# packages into sys.modules before any production module can import the
+# real ones); it is never referenced by name.
+"tests/conftest.py" = ["F401"]
+# `assert False, "..."` in a try/except is a common, harmless idiom for
+# "this line should be unreachable" and reads clearer than raising manually.
+"tests/**" = ["B011"]
+
+[tool.ruff.format]
+quote-style = "double"
 
 [tool.mypy]
 python_version = "3.12"
@@ -72,4 +87,10 @@ warn_unused_ignores = true
 warn_redundant_casts = true
 check_untyped_defs = true
 no_implicit_optional = true
-exclude = ["notebook/"]
+explicit_package_bases = true
+mypy_path = "."
+exclude = ["tests/","assets/"]
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+ignore_errors = true
