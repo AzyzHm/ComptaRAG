@@ -1,20 +1,19 @@
 import ollama
-from services.chroma_service import collection
-from graph.state import GraphState
 
-def retrieve_context(query: str, category, n_results: int = 5):
+from graph.state import GraphState
+from services.chroma_service import collection
+
+
+def retrieve_context(query: str, category: str, n_results: int = 5):
     """
     Retrieves relevant chunks from ChromaDB filtered by category.
     """
-    query_embedding = ollama.embed(
-        model="embeddinggemma",
-        input=query
-    )["embeddings"][0]
+    query_embedding = ollama.embed(model="embeddinggemma", input=query)["embeddings"][0]
 
     results = collection.query(
         query_embeddings=[query_embedding],
         n_results=n_results,
-        where={"category": {"$eq": category}} 
+        where={"category": {"$eq": category}},  # type: ignore[dict-item]
     )
 
     documents = results.get("documents", [[]])
@@ -22,6 +21,7 @@ def retrieve_context(query: str, category, n_results: int = 5):
     if not context_list or not isinstance(context_list, list):
         return "No local documents found."
     return "\n\n".join(context_list)
+
 
 def retrieval_node(state: GraphState):
     context = retrieve_context(state["query"], state["category"], 5)

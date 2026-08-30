@@ -1,6 +1,7 @@
 import os
+
 from dotenv import load_dotenv
 
 load_dotenv()
-gemini_api_key = os.getenv("gemini_api_key")
-tavily_api_key = os.getenv("tavily_api_key")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
