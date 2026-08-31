@@ -7,13 +7,16 @@
 
 .app-button {
   padding: $spacing-sm $spacing-md;
-  border-radius: $radius-sm;
+  border-radius: $radius-md;
   border: none;
   background-color: $color-primary;
   color: white;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.15s ease-in-out;
+  transition:
+    background-color 0.2s $ease-out,
+    transform 0.15s $ease-spring-snappy,
+    box-shadow 0.2s $ease-out;
   @include focus-ring;
 
   :host(.app-button-host--full-width) & {
@@ -22,6 +25,11 @@
 
   &:hover:not(:disabled) {
     background-color: $color-primary-dark;
+  }
+
+  // Feedback lands the instant the pointer goes down, not on release.
+  &:active:not(:disabled) {
+    transform: scale(0.97);
   }
 
   &:disabled {
@@ -33,9 +41,23 @@
     background-color: transparent;
     color: $color-primary;
     border: 1px solid $color-border;
+
+    &:hover:not(:disabled) {
+      background-color: rgba($color-primary, 0.06);
+    }
   }
 
   &--danger {
     background-color: $color-danger;
+  }
+
+  @include reduced-motion {
+    transition:
+      background-color 0.2s ease,
+      box-shadow 0.2s ease;
+
+    &:active:not(:disabled) {
+      transform: none;
+    }
   }
 }
