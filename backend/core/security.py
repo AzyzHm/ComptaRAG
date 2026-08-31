@@ -38,7 +38,8 @@ def _get_or_create_profile(decoded_token: dict) -> dict:
         "created_at": SERVER_TIMESTAMP,
     }
     doc_ref.set(profile)
-    return {"uid": uid, **profile}
+
+    return {"uid": uid, **doc_ref.get().to_dict()}
 
 
 def get_current_user(request: Request) -> dict:
