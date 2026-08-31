@@ -9,6 +9,9 @@
 npm-debug.log
 yarn-error.log
 
+# Angular
+.angular/
+
 # Coverage / test artifacts
 /coverage
 /playwright-report
