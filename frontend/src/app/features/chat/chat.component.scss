@@ -3,7 +3,7 @@
 .chat {
   display: flex;
   flex-direction: column;
-  flex: 1;
+  flex: 0 1 auto;
   min-height: 0;
   width: 100%;
   max-width: 760px;

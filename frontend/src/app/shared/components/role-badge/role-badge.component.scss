@@ -1,0 +1,30 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+.role-badge {
+  display: inline-block;
+  font-family: $font-mono;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px $spacing-sm;
+  border-radius: $radius-sm;
+  border: 1.5px solid currentColor;
+  white-space: nowrap;
+
+  &--user {
+    color: $color-ink-muted;
+    background-color: rgba($color-ink-muted, 0.08);
+  }
+
+  &--admin {
+    color: $color-ledger-teal-dark;
+    background-color: rgba($color-ledger-teal, 0.08);
+  }
+
+  &--super-admin {
+    color: $color-fiscal-ochre-dark;
+    background-color: rgba($color-fiscal-ochre, 0.1);
+  }
+}

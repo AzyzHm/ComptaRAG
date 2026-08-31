@@ -1,3 +1,5 @@
+@use '../styles/variables' as *;
+
 :host {
   display: flex;
   flex-direction: column;
@@ -7,5 +9,7 @@
 .app-content {
   flex: 1;
   display: flex;
+  justify-content: center;
   min-height: 0;
+  padding: 0 $spacing-lg;
 }

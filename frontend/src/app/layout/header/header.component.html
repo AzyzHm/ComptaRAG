@@ -1,4 +1,27 @@
 <header class="app-header">
-  <a routerLink="/" class="app-header__brand">ComptaRAG</a>
-  <span class="app-header__tagline">IFRS &amp; Tunisian fiscal law, grounded</span>
+  <div class="app-header__brand-group">
+    <a routerLink="/" class="app-header__brand">ComptaRAG</a>
+    <span class="app-header__tagline">IFRS &amp; Tunisian fiscal law, grounded</span>
+  </div>
+
+  @if (authService.isAuthenticated()) {
+    <div class="app-header__account">
+      @if (authService.role() === 'ADMIN' || authService.role() === 'SUPER_ADMIN') {
+        <a routerLink="/admin/users" class="app-header__nav-link">Manage users</a>
+      }
+
+      <div class="app-header__user">
+        <span class="app-header__user-name">
+          {{ authService.profile()?.display_name || authService.profile()?.email }}
+        </span>
+        @if (authService.role(); as role) {
+          <app-role-badge [role]="role" />
+        }
+      </div>
+
+      <app-button variant="secondary" (clicked)="logout()">Log out</app-button>
+    </div>
+  } @else if (!authService.isInitializing()) {
+    <a routerLink="/login" class="app-header__nav-link">Sign in</a>
+  }
 </header>

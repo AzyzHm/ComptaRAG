@@ -1,0 +1,67 @@
+<section class="auth">
+  <div class="auth__card">
+    <h1 class="auth__title">
+      {{ mode() === 'sign-in' ? 'Sign in to ComptaRAG' : 'Create your ComptaRAG account' }}
+    </h1>
+    <p class="auth__subtitle">IFRS &amp; Tunisian fiscal law, grounded.</p>
+
+    @if (error()) {
+      <p class="auth__error" role="alert">{{ error() }}</p>
+    }
+
+    <form class="auth__form" (ngSubmit)="submit()">
+      <label for="auth-email" class="auth__label">Email</label>
+      <input
+        id="auth-email"
+        class="auth__input"
+        type="email"
+        name="email"
+        autocomplete="email"
+        [ngModel]="email()"
+        (ngModelChange)="email.set($event)"
+        [disabled]="pending()"
+        required
+      />
+
+      <label for="auth-password" class="auth__label">Password</label>
+      <input
+        id="auth-password"
+        class="auth__input"
+        type="password"
+        name="password"
+        [autocomplete]="mode() === 'sign-in' ? 'current-password' : 'new-password'"
+        [ngModel]="password()"
+        (ngModelChange)="password.set($event)"
+        [disabled]="pending()"
+        required
+      />
+
+      <app-button
+        type="submit"
+        [fullWidth]="true"
+        [disabled]="pending() || !email().trim() || !password()"
+      >
+        {{ pending() ? 'Please wait…' : mode() === 'sign-in' ? 'Sign in' : 'Create account' }}
+      </app-button>
+    </form>
+
+    <div class="auth__divider"><span>or</span></div>
+
+    <app-button
+      variant="secondary"
+      [fullWidth]="true"
+      [disabled]="pending()"
+      (clicked)="continueWithGoogle()"
+    >
+      Continue with Google
+    </app-button>
+
+    <button type="button" class="auth__toggle" (click)="toggleMode()" [disabled]="pending()">
+      {{
+        mode() === 'sign-in'
+          ? "Don't have an account? Create one"
+          : 'Already have an account? Sign in'
+      }}
+    </button>
+  </div>
+</section>

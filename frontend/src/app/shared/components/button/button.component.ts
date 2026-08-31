@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  HostBinding,
+  Input,
+  Output
+} from '@angular/core';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'danger';
 
@@ -13,6 +20,10 @@ export class ButtonComponent {
   @Input() variant: ButtonVariant = 'primary';
   @Input() disabled = false;
   @Input() type: 'button' | 'submit' | 'reset' = 'button';
+
+  @Input()
+  @HostBinding('class.app-button-host--full-width')
+  fullWidth = false;
 
   @Output() readonly clicked = new EventEmitter<MouseEvent>();
 

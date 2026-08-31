@@ -1,0 +1,8 @@
+<span
+  class="role-badge"
+  [class.role-badge--user]="role === 'USER'"
+  [class.role-badge--admin]="role === 'ADMIN'"
+  [class.role-badge--super-admin]="role === 'SUPER_ADMIN'"
+>
+  {{ role === 'SUPER_ADMIN' ? 'Super admin' : role === 'ADMIN' ? 'Admin' : 'User' }}
+</span>
