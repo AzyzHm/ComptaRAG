@@ -1,6 +1,10 @@
 @use '../../../../styles/variables' as *;
 @use '../../../../styles/mixins' as *;
 
+:host(.app-button-host--full-width) {
+  display: block;
+}
+
 .app-button {
   padding: $spacing-sm $spacing-md;
   border-radius: $radius-sm;
@@ -11,6 +15,10 @@
   cursor: pointer;
   transition: background-color 0.15s ease-in-out;
   @include focus-ring;
+
+  :host(.app-button-host--full-width) & {
+    width: 100%;
+  }
 
   &:hover:not(:disabled) {
     background-color: $color-primary-dark;
