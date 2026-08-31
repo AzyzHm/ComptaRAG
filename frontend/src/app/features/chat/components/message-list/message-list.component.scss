@@ -14,9 +14,11 @@
   margin: auto 0;
   text-align: center;
   color: $color-ink-muted;
+  animation: entry-in 0.4s $ease-spring both;
 
   h1 {
-    font-size: 1.75rem;
+    font-size: clamp(1.5rem, 4vw, 1.875rem);
+    letter-spacing: -0.01em;
     color: $color-ink;
     margin-bottom: $spacing-sm;
   }
@@ -24,28 +26,47 @@
   p {
     max-width: 32ch;
     margin: 0 auto;
+    line-height: 1.5;
   }
 }
 
 .message-list__pending {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
   color: $color-ink-muted;
   font-size: 0.875rem;
   font-style: italic;
 }
 
-.entry {
-  padding-bottom: $spacing-md;
-  border-bottom: 1px solid $color-rule;
+.message-list__pending-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: $color-ledger-teal;
+  animation: pending-bounce 1s ease-in-out infinite;
 
-  &:last-child {
-    border-bottom: none;
+  &:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+
+  &:nth-child(3) {
+    animation-delay: 0.3s;
   }
 }
 
-.entry__query {
-  margin: 0;
-  font-weight: 600;
-  color: $color-ink;
+.message-list__pending-label {
+  font-style: italic;
+}
+
+.entry {
+  display: flex;
+  flex-direction: column;
+  animation: entry-in 0.35s $ease-spring both;
+
+  &--user {
+    align-items: flex-end;
+  }
 }
 
 .entry__answer {
@@ -53,11 +74,66 @@
   flex-direction: column;
   align-items: flex-start;
   gap: $spacing-sm;
-  margin-top: $spacing-sm;
+  width: 100%;
 }
 
-.entry__answer-text {
+.entry__bubble {
   margin: 0;
   white-space: pre-line;
-  color: $color-ink;
+  line-height: 1.55;
+  border-radius: $radius-lg;
+  padding: $spacing-sm $spacing-md;
+  max-width: 80%;
+
+  &--user {
+    background-color: $color-ledger-teal;
+    color: white;
+    font-weight: 500;
+    border-bottom-right-radius: $radius-sm;
+  }
+
+  &--assistant {
+    background-color: $color-paper-raised;
+    border: 1px solid $color-rule;
+    color: $color-ink;
+    width: 100%;
+    max-width: 100%;
+    border-bottom-left-radius: $radius-sm;
+  }
+}
+
+@keyframes entry-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pending-bounce {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  40% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+}
+
+@include reduced-motion {
+  .message-list__empty,
+  .entry {
+    animation: none;
+  }
+
+  .message-list__pending-dot {
+    animation: none;
+    opacity: 0.8;
+  }
 }
