@@ -2,14 +2,19 @@
 @use '../../../styles/mixins' as *;
 
 .app-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: $spacing-md;
   padding: $spacing-md $spacing-lg;
-  background-color: $color-paper-raised;
-  border-bottom: 1px solid $color-rule;
+  background-color: $glass-paper;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid $glass-border;
 
   &__brand-group {
     display: flex;
@@ -21,9 +26,16 @@
     font-family: $font-display;
     font-size: 1.25rem;
     font-weight: 600;
+    letter-spacing: -0.01em;
     color: $color-ink;
     text-decoration: none;
+    display: inline-block;
+    transition: transform 0.15s $ease-spring-snappy;
     @include focus-ring;
+
+    &:active {
+      transform: scale(0.97);
+    }
   }
 
   &__tagline {
