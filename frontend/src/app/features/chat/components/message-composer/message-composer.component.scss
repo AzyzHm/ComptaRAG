@@ -2,12 +2,13 @@
 @use '../../../../../styles/mixins' as *;
 
 .composer {
-  display: flex;
-  align-items: flex-end;
-  gap: $spacing-sm;
   padding: $spacing-md $spacing-lg;
-  background-color: $color-paper-raised;
-  border-top: 1px solid $color-rule;
+  // Translucent material floating over the message list, per Apple's
+  // toolbar treatment: content scrolls underneath, chrome stays glassy.
+  background-color: $glass-paper;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-top: 1px solid $glass-border;
 }
 
 .composer__label {
@@ -18,19 +19,102 @@
   clip: rect(0, 0, 0, 0);
 }
 
+.composer__bar {
+  display: flex;
+  align-items: flex-end;
+  gap: $spacing-sm;
+  padding: $spacing-xs;
+  background-color: $color-paper;
+  border: 1px solid $color-rule;
+  border-radius: $radius-xl;
+  transition: box-shadow 0.2s $ease-out;
+
+  &:focus-within {
+    box-shadow: 0 0 0 3px rgba($color-ledger-teal, 0.15);
+    border-color: $color-ledger-teal;
+  }
+}
+
 .composer__input {
   flex: 1;
   resize: none;
-  padding: $spacing-sm $spacing-md;
-  border-radius: $radius-md;
-  border: 1px solid $color-rule;
-  background-color: $color-paper;
+  max-height: 140px;
+  padding: $spacing-sm $spacing-sm $spacing-sm $spacing-md;
+  border: none;
+  background: transparent;
   color: $color-ink;
   font-size: 0.9375rem;
   line-height: 1.4;
-  @include focus-ring;
+  outline: none;
 
   &:disabled {
     opacity: 0.6;
+  }
+
+  &::placeholder {
+    color: $color-ink-muted;
+  }
+}
+
+.composer__send {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: $radius-pill;
+  background-color: $color-primary;
+  color: white;
+  cursor: pointer;
+  transition:
+    background-color 0.2s $ease-out,
+    transform 0.15s $ease-spring-snappy;
+  @include focus-ring;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover:not(:disabled) {
+    background-color: $color-primary-dark;
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.92);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.composer__send-spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: white;
+  animation: composer-spin 0.7s linear infinite;
+}
+
+@keyframes composer-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@include reduced-motion {
+  .composer__send {
+    &:active:not(:disabled) {
+      transform: none;
+    }
+  }
+
+  .composer__send-spinner {
+    animation-duration: 1.4s;
   }
 }

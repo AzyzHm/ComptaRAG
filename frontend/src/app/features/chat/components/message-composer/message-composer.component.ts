@@ -8,12 +8,10 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { ButtonComponent } from '@shared/components/button/button.component';
-
 @Component({
   selector: 'app-message-composer',
   standalone: true,
-  imports: [FormsModule, ButtonComponent],
+  imports: [FormsModule],
   templateUrl: './message-composer.component.html',
   styleUrl: './message-composer.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
