@@ -13,8 +13,26 @@
 .chat__error {
   margin: 0 $spacing-lg $spacing-sm;
   padding: $spacing-sm $spacing-md;
-  border-radius: $radius-sm;
+  border-radius: $radius-md;
   border: 1px solid $color-danger;
   color: $color-danger;
   font-size: 0.875rem;
+  animation: chat-error-in 0.25s $ease-spring-snappy both;
+}
+
+@keyframes chat-error-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat__error {
+    animation: none;
+  }
 }
