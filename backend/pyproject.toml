@@ -18,6 +18,7 @@ dependencies = [
     "langgraph>=1.0,<2",
     "tavily-python>=0.7,<0.8",
     "pypdf>=6.3,<7",
+    "firebase-admin>=7.5,<8",
 ]
 
 # This package ships no importable code of its own, config/graph/routes/services
@@ -66,6 +67,13 @@ ignore = [
 # `assert False, "..."` in a try/except is a common, harmless idiom for
 # "this line should be unreachable" and reads clearer than raising manually.
 "tests/**" = ["B011"]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI's dependency-injection system relies on calling Depends(...) (and
+# our own require_roles(...) factory) directly in argument defaults, this is
+# the documented, intended usage, not the mutable-default-argument bug B008
+# otherwise warns about.
+extend-immutable-calls = ["fastapi.Depends", "core.security.require_roles"]
 
 [tool.ruff.format]
 quote-style = "double"
