@@ -1,0 +1,107 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+.auth {
+  @include flex-center;
+  flex: 1;
+  padding: $spacing-lg;
+}
+
+.auth__card {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  width: 100%;
+  max-width: 360px;
+  padding: $spacing-xl $spacing-lg;
+  background-color: $color-paper-raised;
+  border: 1px solid $color-rule;
+  border-radius: $radius-lg;
+}
+
+.auth__title {
+  font-size: 1.375rem;
+  text-align: center;
+}
+
+.auth__subtitle {
+  margin: 0 0 $spacing-sm;
+  text-align: center;
+  color: $color-ink-muted;
+  font-size: 0.8125rem;
+}
+
+.auth__error {
+  margin: 0;
+  padding: $spacing-sm $spacing-md;
+  border-radius: $radius-sm;
+  border: 1px solid $color-danger;
+  color: $color-danger;
+  font-size: 0.875rem;
+}
+
+.auth__form {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-sm;
+}
+
+.auth__label {
+  font-size: 0.8125rem;
+  color: $color-ink-muted;
+  margin-top: $spacing-sm;
+}
+
+.auth__input {
+  padding: $spacing-sm $spacing-md;
+  border-radius: $radius-md;
+  border: 1px solid $color-rule;
+  background-color: $color-paper;
+  color: $color-ink;
+  font-size: 0.9375rem;
+  @include focus-ring;
+
+  &:disabled {
+    opacity: 0.6;
+  }
+}
+
+.auth__form app-button,
+.auth__card > app-button {
+  margin-top: $spacing-xs;
+}
+
+.auth__divider {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  color: $color-ink-muted;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background-color: $color-rule;
+  }
+}
+
+.auth__toggle {
+  margin-top: $spacing-sm;
+  background: none;
+  border: none;
+  color: $color-ledger-teal;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  text-align: center;
+  @include focus-ring;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
