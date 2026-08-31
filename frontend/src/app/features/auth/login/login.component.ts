@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { take } from 'rxjs';
 
 import { AuthService } from '@core/services/auth.service';
 import { ButtonComponent } from '@shared/components/button/button.component';
@@ -39,16 +40,32 @@ function friendlyAuthError(error: unknown): string {
 export class LoginComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   protected readonly mode = signal<AuthMode>('sign-in');
   protected readonly email = signal('');
   protected readonly password = signal('');
+  protected readonly passwordVisible = signal(false);
   protected readonly pending = signal(false);
   protected readonly error = signal<string | null>(null);
+
+  constructor() {
+    // Lets the home page's "Get started" button land straight on the
+    // registration form via /login?mode=register.
+    this.route.queryParamMap.pipe(take(1)).subscribe((params) => {
+      if (params.get('mode') === 'register') {
+        this.mode.set('register');
+      }
+    });
+  }
 
   protected toggleMode(): void {
     this.mode.set(this.mode() === 'sign-in' ? 'register' : 'sign-in');
     this.error.set(null);
+  }
+
+  protected togglePasswordVisibility(): void {
+    this.passwordVisible.update((visible) => !visible);
   }
 
   protected async submit(): Promise<void> {
@@ -67,7 +84,7 @@ export class LoginComponent {
       } else {
         await this.authService.registerWithEmail(email, password);
       }
-      await this.router.navigateByUrl('/');
+      await this.router.navigateByUrl('/chat');
     } catch (err) {
       this.error.set(friendlyAuthError(err));
     } finally {
@@ -85,7 +102,7 @@ export class LoginComponent {
 
     try {
       await this.authService.signInWithGoogle();
-      await this.router.navigateByUrl('/');
+      await this.router.navigateByUrl('/chat');
     } catch (err) {
       this.error.set(friendlyAuthError(err));
     } finally {
