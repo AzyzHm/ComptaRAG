@@ -1,0 +1,26 @@
+<section class="home">
+  <div class="home__hero">
+    <p class="home__eyebrow">Agentic RAG for accountants</p>
+    <h1 class="home__title">Ask ComptaRAG anything about IFRS or Tunisian fiscal law</h1>
+    <p class="home__subtitle">
+      A grounded assistant that answers from the standards and the tax code, not from a guess, in
+      French or English, whichever you reach for first.
+    </p>
+
+    <div class="home__actions">
+      <app-button [fullWidth]="false" (clicked)="goToRegister()">Get started</app-button>
+      <app-button variant="secondary" [fullWidth]="false" (clicked)="goToSignIn()">
+        Sign in
+      </app-button>
+    </div>
+  </div>
+
+  <div class="home__highlights">
+    @for (highlight of highlights; track highlight.title) {
+      <article class="home__card">
+        <h2 class="home__card-title">{{ highlight.title }}</h2>
+        <p class="home__card-body">{{ highlight.body }}</p>
+      </article>
+    }
+  </div>
+</section>
