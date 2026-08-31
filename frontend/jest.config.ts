@@ -5,6 +5,8 @@ const config: Config = {
   setupFilesAfterEnv: ['<rootDir>/setup-jest.ts'],
   testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/tests/e2e/'],
   moduleNameMapper: {
+    '^firebase/app$': '<rootDir>/tests/mocks/firebase-app.mock.ts',
+    '^firebase/auth$': '<rootDir>/tests/mocks/firebase-auth.mock.ts',
     '^@app/(.*)$': '<rootDir>/src/app/$1',
     '^@core/(.*)$': '<rootDir>/src/app/core/$1',
     '^@shared/(.*)$': '<rootDir>/src/app/shared/$1',
