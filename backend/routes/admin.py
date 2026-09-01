@@ -3,6 +3,7 @@ from pydantic import BaseModel
 
 from config.firebase import get_firestore_client
 from core.security import USERS_COLLECTION, require_roles
+from core.stats import list_recent_logins, list_usage_totals
 from models.roles import Role
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
@@ -59,3 +60,21 @@ async def update_user_role(
 
     doc_ref.update({"role": body.role.value})
     return {"uid": uid, **target, "role": body.role.value}
+
+
+@router.get("/stats/logins")
+async def list_login_events(
+    current_user: dict = Depends(require_roles(Role.ADMIN, Role.SUPER_ADMIN)),
+):
+    """Lists the most recent sign-ins across every account: who logged in,
+    from what IP, and when. Visible to ADMIN and SUPER_ADMIN."""
+    return list_recent_logins()
+
+
+@router.get("/stats/usage")
+async def list_token_usage(
+    current_user: dict = Depends(require_roles(Role.ADMIN, Role.SUPER_ADMIN)),
+):
+    """Lists every user's running token usage total. Visible to ADMIN and
+    SUPER_ADMIN."""
+    return list_usage_totals()
