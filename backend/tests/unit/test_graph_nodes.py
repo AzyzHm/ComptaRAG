@@ -21,8 +21,19 @@ def _base_state(**overrides):
 
 
 class FakeResponse:
-    def __init__(self, text):
+    def __init__(self, text, usage_metadata=None):
         self.text = text
+        self.usage_metadata = usage_metadata
+
+
+class FakeUsage:
+    def __init__(self, prompt_token_count=0, candidates_token_count=0, total_token_count=0):
+        self.prompt_token_count = prompt_token_count
+        self.candidates_token_count = candidates_token_count
+        self.total_token_count = total_token_count
+
+
+_ZERO_USAGE = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
 
 
 class TestRouterNode:
@@ -124,7 +135,10 @@ class TestGenerateNode:
         monkeypatch.setattr(generate_mod, "getResponseFromLLM", _fake)
         state = _base_state(query="What is an asset?", context="", category="general_knowledge")
 
-        assert generate_mod.generate_answer_node(state) == {"answer": "A concise answer."}
+        assert generate_mod.generate_answer_node(state) == {
+            "answer": "A concise answer.",
+            "token_usage": _ZERO_USAGE,
+        }
         assert captured["system_prompt"] == expert_prompt_v1
         assert captured["user_prompt"] == "QUESTION: What is an asset?"
 
@@ -151,7 +165,7 @@ class TestGenerateNode:
         )
         result = generate_mod.generate_answer_node(state)
 
-        assert result == {"answer": "A grounded answer."}
+        assert result == {"answer": "A grounded answer.", "token_usage": _ZERO_USAGE}
         assert captured["system_prompt"] == expert_prompt_v2
         assert (
             "CONTEXT: IAS 37 requires a present obligation from a past event."
@@ -183,6 +197,74 @@ class TestGenerateNode:
         state = {"query": "q", "context": "some context"}
         generate_mod.generate_answer_node(state)
         assert captured["system_prompt"] == expert_prompt_v1
+
+    def test_includes_recent_history_in_the_prompt(self, monkeypatch):
+        captured = {}
+        monkeypatch.setattr(
+            generate_mod,
+            "getResponseFromLLM",
+            lambda **kw: captured.update(kw) or FakeResponse("answer"),
+        )
+        state = _base_state(
+            query="And what about the VAT rate?",
+            context="",
+            category="general_knowledge",
+            history=[
+                {"role": "user", "content": "What is the corporate tax rate?"},
+                {"role": "assistant", "content": "It is 15% for most companies."},
+            ],
+        )
+
+        generate_mod.generate_answer_node(state)
+
+        assert "CONVERSATION SO FAR:" in captured["user_prompt"]
+        assert "User: What is the corporate tax rate?" in captured["user_prompt"]
+        assert "Assistant: It is 15% for most companies." in captured["user_prompt"]
+        assert "QUESTION: And what about the VAT rate?" in captured["user_prompt"]
+
+    def test_omits_history_block_when_history_is_empty(self, monkeypatch):
+        captured = {}
+        monkeypatch.setattr(
+            generate_mod,
+            "getResponseFromLLM",
+            lambda **kw: captured.update(kw) or FakeResponse("answer"),
+        )
+        generate_mod.generate_answer_node(_base_state(context="", history=[]))
+        assert "CONVERSATION SO FAR" not in captured["user_prompt"]
+
+    def test_only_keeps_the_last_ten_history_turns(self, monkeypatch):
+        captured = {}
+        monkeypatch.setattr(
+            generate_mod,
+            "getResponseFromLLM",
+            lambda **kw: captured.update(kw) or FakeResponse("answer"),
+        )
+        history = [{"role": "user", "content": f"turn {i}"} for i in range(15)]
+        generate_mod.generate_answer_node(_base_state(context="", history=history))
+
+        assert "turn 5" in captured["user_prompt"]
+        assert "turn 14" in captured["user_prompt"]
+        assert "turn 4" not in captured["user_prompt"]
+
+    def test_extracts_token_usage_from_response_metadata(self, monkeypatch):
+        usage = FakeUsage(prompt_token_count=10, candidates_token_count=20, total_token_count=30)
+        monkeypatch.setattr(
+            generate_mod,
+            "getResponseFromLLM",
+            lambda **kw: FakeResponse("answer", usage_metadata=usage),
+        )
+        result = generate_mod.generate_answer_node(_base_state(context="c"))
+
+        assert result["token_usage"] == {
+            "prompt_tokens": 10,
+            "completion_tokens": 20,
+            "total_tokens": 30,
+        }
+
+    def test_defaults_token_usage_to_zero_when_metadata_missing(self, monkeypatch):
+        monkeypatch.setattr(generate_mod, "getResponseFromLLM", lambda **kw: FakeResponse("answer"))
+        result = generate_mod.generate_answer_node(_base_state(context="c"))
+        assert result["token_usage"] == _ZERO_USAGE
 
 
 class TestWebSearchNode:
