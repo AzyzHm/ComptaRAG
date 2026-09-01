@@ -38,7 +38,7 @@ ComptaRAG is an agentic RAG assistant for accounting and financial-law questions
 
 The project has two parts:
 
-- **Angular frontend** (`frontend/`): the chat interface users interact with, plus sign-in, sign-up, and an admin page for managing user roles.
+- **Angular frontend** (`frontend/`): a public landing page, sign-in/sign-up, the chat interface, and an admin page for managing user roles.
 - **FastAPI backend** (`backend/`): a LangGraph agent that routes each question, retrieves relevant context from a ChromaDB vector store (embedded locally via Ollama), falls back to a Tavily web search when local context is not enough, and generates the final answer with Gemini.
 
 Authentication is handled by Firebase: the frontend signs users in with the Firebase JS SDK (email and password, or Google), and the backend verifies the resulting ID token with the Firebase Admin SDK on every request. User profiles and roles live in a Firestore `users` collection. See [section 4.3](#43-firebase-setup) for setup, and [section 5](#5-authentication-and-roles) for how roles work.
@@ -109,7 +109,7 @@ npm install
 npm start
 ```
 
-The app comes up at `http://localhost:4200` and expects the backend to be running. Before it can sign anyone in, fill in the Firebase web config in `frontend/src/environments/environment.ts` (and `environment.prod.ts` for a production build), see [section 4.3](#43-firebase-setup).
+The app comes up at `http://localhost:4200` with a public landing page, and expects the backend to be running. Before it can sign anyone in, fill in the Firebase web config in `frontend/src/environments/environment.ts` (and `environment.prod.ts` for a production build), see [section 4.3](#43-firebase-setup).
 
 ### 4.3 Firebase setup
 
@@ -124,7 +124,7 @@ Authentication runs on Firebase, both the backend and the frontend need to point
 
 ## 5. Authentication and roles
 
-Every page requires a signed-in user, including the chat itself. There are three roles:
+Every page requires a signed-in user, except the public landing page at `/`, which shows sign-in and sign-up options to visitors and redirects anyone already signed in straight to `/chat`. There are three roles:
 
 - `USER`: can use the chat. This is the default role for every new account after the first.
 - `ADMIN`: everything `USER` can do, plus access to `/admin/users`, where they can promote or demote accounts between `USER` and `ADMIN`. An `ADMIN` cannot modify a `SUPER_ADMIN` account, and cannot grant the `SUPER_ADMIN` role to anyone.
@@ -132,7 +132,7 @@ Every page requires a signed-in user, including the chat itself. There are three
 
 Nobody can change their own role, to avoid accidentally locking themselves out.
 
-On the backend, this is enforced by `core/security.py` (token verification and the get-or-create Firestore profile) and `routes/admin.py` (the role-change rules above). On the frontend, `core/guards/auth.guard.ts` blocks unauthenticated visitors and `core/guards/role.guard.ts` restricts `/admin/users` to `ADMIN` and `SUPER_ADMIN`, both mirror the backend's rules so the UI never offers an action the API would reject, but the backend remains the source of truth.
+On the backend, this is enforced by `core/security.py` (token verification and the get-or-create Firestore profile) and `routes/admin.py` (the role-change rules above). On the frontend, `core/guards/auth.guard.ts` blocks unauthenticated visitors from `/chat` and sends signed-in visitors away from the public landing page and login screen, and `core/guards/role.guard.ts` restricts `/admin/users` to `ADMIN` and `SUPER_ADMIN`, both mirror the backend's rules so the UI never offers an action the API would reject, but the backend remains the source of truth.
 
 ## 6. Testing
 

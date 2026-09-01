@@ -1,17 +1,42 @@
 <form class="composer" (ngSubmit)="submit()">
   <label for="composer-input" class="composer__label">Ask a question</label>
-  <textarea
-    id="composer-input"
-    class="composer__input"
-    name="query"
-    rows="2"
-    placeholder="e.g. Comment est déterminé le résultat fiscal à partir du résultat comptable ?"
-    [ngModel]="draft()"
-    (ngModelChange)="draft.set($event)"
-    [disabled]="disabled"
-    (keydown.enter)="onEnter($event)"
-  ></textarea>
-  <app-button type="submit" [disabled]="disabled || !draft().trim()">
-    {{ disabled ? 'Asking…' : 'Ask' }}
-  </app-button>
+  <div class="composer__bar">
+    <textarea
+      id="composer-input"
+      class="composer__input"
+      name="query"
+      rows="1"
+      placeholder="e.g. Comment est déterminé le résultat fiscal à partir du résultat comptable ?"
+      [ngModel]="draft()"
+      (ngModelChange)="draft.set($event)"
+      [disabled]="disabled"
+      (keydown.enter)="onEnter($event)"
+    ></textarea>
+    <button
+      type="submit"
+      class="composer__send"
+      [disabled]="disabled || !draft().trim()"
+      [attr.aria-label]="disabled ? 'Asking' : 'Ask'"
+    >
+      @if (disabled) {
+        <span class="composer__send-spinner" aria-hidden="true"></span>
+      } @else {
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path
+            d="M4 12L20 4L14 20L11.5 13.5L4 12Z"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linejoin="round"
+            stroke-linecap="round"
+          />
+          <path
+            d="M11.5 13.5L20 4"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+          />
+        </svg>
+      }
+    </button>
+  </div>
 </form>

@@ -20,6 +20,6 @@ export function roleGuard(...roles: Role[]): CanActivateFn {
       return true;
     }
 
-    return router.parseUrl('/');
+    return router.parseUrl('/chat');
   };
 }

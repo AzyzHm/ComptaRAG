@@ -1,6 +1,8 @@
 <header class="app-header">
   <div class="app-header__brand-group">
-    <a routerLink="/" class="app-header__brand">ComptaRAG</a>
+    <a [routerLink]="authService.isAuthenticated() ? '/chat' : '/'" class="app-header__brand">
+      ComptaRAG
+    </a>
     <span class="app-header__tagline">IFRS &amp; Tunisian fiscal law, grounded</span>
   </div>
 

@@ -56,14 +56,14 @@ describe('guestGuard', () => {
     expect(result).toBe(true);
   });
 
-  it('redirects an already-signed-in user to /', async () => {
+  it('redirects an already-signed-in user to /chat', async () => {
     const { router, urlTree } = setup(true);
 
     const result = await TestBed.runInInjectionContext(() =>
       guestGuard(null as never, null as never)
     );
 
-    expect(router.parseUrl).toHaveBeenCalledWith('/');
+    expect(router.parseUrl).toHaveBeenCalledWith('/chat');
     expect(result).toBe(urlTree);
   });
 });

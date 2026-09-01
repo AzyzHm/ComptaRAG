@@ -23,7 +23,7 @@ export const guestGuard: CanActivateFn = async () => {
   await authService.ready;
 
   if (authService.isAuthenticated()) {
-    return router.parseUrl('/');
+    return router.parseUrl('/chat');
   }
 
   return true;

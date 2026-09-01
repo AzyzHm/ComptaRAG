@@ -44,13 +44,13 @@ describe('roleGuard', () => {
     expect(result).toBe(urlTree);
   });
 
-  it('sends a signed-in user with the wrong role to /', async () => {
+  it('sends a signed-in user with the wrong role to /chat', async () => {
     const { router, urlTree } = setup(true, 'USER');
     const guard = roleGuard('ADMIN', 'SUPER_ADMIN');
 
     const result = await TestBed.runInInjectionContext(() => guard(null as never, null as never));
 
-    expect(router.parseUrl).toHaveBeenCalledWith('/');
+    expect(router.parseUrl).toHaveBeenCalledWith('/chat');
     expect(result).toBe(urlTree);
   });
 });
