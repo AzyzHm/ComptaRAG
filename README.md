@@ -25,10 +25,11 @@
 3. [Roadmap](#3-roadmap)
 4. [Getting started](#4-getting-started)
 5. [Authentication and roles](#5-authentication-and-roles)
-6. [Testing](#6-testing)
-7. [Contributing](#7-contributing)
-8. [Security](#8-security)
-9. [License](#9-license)
+6. [Data model and stats](#6-data-model-and-stats)
+7. [Testing](#7-testing)
+8. [Contributing](#8-contributing)
+9. [Security](#9-security)
+10. [License](#10-license)
 
 ## 1. What ComptaRAG does
 
@@ -47,13 +48,12 @@ Authentication is handled by Firebase: the frontend signs users in with the Fire
 
 Planned, not yet built:
 
-- Conversation history: the assistant remembering and using past turns in a session.
 - Selectable retrieval mode: keyword search (BM25), semantic search, or a hybrid of both.
 - Reranking: retrieved chunks reranked with `jina-reranker-v2-base` before being used as context.
 - Query refinement: rewriting or clarifying the user's question before retrieval, including resolving it against conversation history.
 - Iterative retrieval: if retrieved context is judged insufficient, refining the query and retrieving again (up to two passes) before falling back to a web search.
 
-None of these are implemented yet. The current pipeline is a single pass: route, retrieve, validate, generate, with a web search fallback when validation fails.
+None of these are implemented yet. The current pipeline is a single pass: route, retrieve, validate, generate, with a web search fallback when validation fails, and the last 10 messages of the active chat given to the generate step as conversation history.
 
 ## 4. Getting started
 
@@ -98,7 +98,7 @@ Run the API:
 uvicorn main:app --reload
 ```
 
-The API comes up at `http://127.0.0.1:8000`, with the chat endpoint at `POST /chat/`.
+The API comes up at `http://127.0.0.1:8000`. Chats live under `/chats`: `POST /chats/` starts a new chat, `GET /chats/` lists yours, `GET /chats/{id}` returns one with its full message history, `PATCH /chats/{id}` renames it, `DELETE /chats/{id}` removes it, and `POST /chats/{id}/messages` sends a message, the agent answers with the chat's last 10 messages as conversational context, and both messages are saved.
 
 ### 4.2 Frontend
 
@@ -117,7 +117,7 @@ Authentication runs on Firebase, both the backend and the frontend need to point
 
 1. Create a project at [console.firebase.google.com](https://console.firebase.google.com), if you do not already have one.
 2. Under **Build > Authentication > Sign-in method**, enable the **Email/Password** and **Google** providers.
-3. Under **Build > Firestore Database**, create a database. The app manages the `users` collection itself, no manual setup is needed there, but you should still set security rules that block direct client reads and writes to that collection, since all access goes through the backend.
+3. Under **Build > Firestore Database**, create a database. The app manages the `users`, `chats`, `login_events`, and `usage_totals` collections itself, no manual setup is needed there, but you should still set security rules that block direct client reads and writes to all of them, since all access goes through the backend.
 4. Under **Project settings > Service accounts**, generate a new private key. This downloads a JSON file, save it somewhere on disk and point `FIREBASE_SERVICE_ACCOUNT_PATH` at it in the backend's `.env`. Set `FIREBASE_PROJECT_ID` to the project ID shown at the top of that same page. This file is a credential, keep it out of version control.
 5. Under **Project settings > General > Your apps**, add a web app if you do not have one, and copy its config object into `frontend/src/environments/environment.ts` and `environment.prod.ts`. This config is public client identification, not a secret, it is safe to commit once filled in.
 6. The very first account anyone creates, through either sign-in method, automatically becomes `SUPER_ADMIN`. Every account after that starts as `USER`. Sign up first to claim that role, then use the admin page at `/admin/users` to promote others.
@@ -134,7 +134,20 @@ Nobody can change their own role, to avoid accidentally locking themselves out.
 
 On the backend, this is enforced by `core/security.py` (token verification and the get-or-create Firestore profile) and `routes/admin.py` (the role-change rules above). On the frontend, `core/guards/auth.guard.ts` blocks unauthenticated visitors from `/chat` and sends signed-in visitors away from the public landing page and login screen, and `core/guards/role.guard.ts` restricts `/admin/users` to `ADMIN` and `SUPER_ADMIN`, both mirror the backend's rules so the UI never offers an action the API would reject, but the backend remains the source of truth.
 
-## 6. Testing
+## 6. Data model and stats
+
+Everything lives in Firestore, alongside the `users` collection described above:
+
+- `chats/{chatId}`: `owner_uid`, `title` (auto-generated from the first message, up to 60 characters), `created_at`, `updated_at`. Only the owner can read, rename, or delete a chat.
+- `chats/{chatId}/messages/{messageId}`: `role` (`user` or `assistant`), `content`, `created_at`, and on assistant messages, `category` (the router's classification) and `token_usage`. The last 10 messages of a chat are passed to the agent as conversation history on every new message.
+- `login_events/{eventId}`: `uid`, `email`, `ip`, `user_agent`, `created_at`, one entry per call to `GET /auth/me`, which the frontend calls right after every sign-in. Each user's profile also gets a `last_login_at` / `last_login_ip` stamp for a quick per-user summary without scanning events.
+- `usage_totals/{uid}`: `prompt_tokens`, `completion_tokens`, `total_tokens`, `message_count`, a running total updated after every assistant reply, so reading usage stats does not require summing every message ever sent.
+
+`GET /admin/stats/logins` and `GET /admin/stats/usage` (both `ADMIN`/`SUPER_ADMIN` only) expose this data for an admin dashboard.
+
+Listing a user's chats filters on `owner_uid` and orders by `updated_at`, Firestore needs a composite index for that combination. The Firebase console will show a direct "create this index" link the first time that query runs against a real database if one is missing.
+
+## 7. Testing
 
 Backend, from `backend/`:
 
@@ -151,14 +164,14 @@ npm test
 
 Both also run in CI on every push and pull request to `main`. See `.github/workflows/ci.yml` for details.
 
-## 7. Contributing
+## 8. Contributing
 
 Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening an issue or pull request, and follow our [Code of Conduct](CODE_OF_CONDUCT.md).
 
-## 8. Security
+## 9. Security
 
 Found a serious vulnerability? Please do not open a public issue, see [SECURITY.md](SECURITY.md) for how to report it responsibly.
 
-## 9. License
+## 10. License
 
 This project is licensed under the [Apache License 2.0](LICENSE).
