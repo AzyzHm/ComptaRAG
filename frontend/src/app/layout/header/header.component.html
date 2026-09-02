@@ -1,6 +1,7 @@
 <header class="app-header">
   <div class="app-header__brand-group">
     <a [routerLink]="authService.isAuthenticated() ? '/chat' : '/'" class="app-header__brand">
+      <img src="/logo.png" alt="" class="app-header__logo" />
       ComptaRAG
     </a>
     <span class="app-header__tagline">IFRS &amp; Tunisian fiscal law, grounded</span>
@@ -12,14 +13,14 @@
         <a routerLink="/admin/users" class="app-header__nav-link">Manage users</a>
       }
 
-      <div class="app-header__user">
+      <button type="button" class="app-header__user" (click)="openProfileModal()">
         <span class="app-header__user-name">
           {{ authService.profile()?.display_name || authService.profile()?.email }}
         </span>
         @if (authService.role(); as role) {
           <app-role-badge [role]="role" />
         }
-      </div>
+      </button>
 
       <app-button variant="secondary" (clicked)="logout()">Log out</app-button>
     </div>
@@ -27,3 +28,7 @@
     <a routerLink="/login" class="app-header__nav-link">Sign in</a>
   }
 </header>
+
+@if (profileModalOpen()) {
+  <app-profile-modal (closed)="closeProfileModal()" />
+}

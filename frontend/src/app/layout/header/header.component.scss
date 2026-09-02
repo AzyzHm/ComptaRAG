@@ -23,19 +23,27 @@
   }
 
   &__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-sm;
     font-family: $font-display;
     font-size: 1.25rem;
     font-weight: 600;
     letter-spacing: -0.01em;
     color: $color-ink;
     text-decoration: none;
-    display: inline-block;
     transition: transform 0.15s $ease-spring-snappy;
     @include focus-ring;
 
     &:active {
       transform: scale(0.97);
     }
+  }
+
+  &__logo {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
   }
 
   &__tagline {
@@ -69,6 +77,23 @@
     display: flex;
     align-items: center;
     gap: $spacing-sm;
+    padding: $spacing-xs $spacing-sm;
+    border: none;
+    border-radius: $radius-md;
+    background: transparent;
+    cursor: pointer;
+    transition:
+      background-color 0.15s $ease-out,
+      transform 0.15s $ease-spring-snappy;
+    @include focus-ring;
+
+    &:hover {
+      background-color: rgba($color-ink, 0.06);
+    }
+
+    &:active {
+      transform: scale(0.97);
+    }
   }
 
   &__user-name {
