@@ -46,6 +46,28 @@ def _get_or_create_profile(decoded_token: dict) -> dict:
     return {"uid": uid, **doc_ref.get().to_dict()}
 
 
+def update_profile_fields(
+    uid: str, *, display_name: str | None = None, email: str | None = None
+) -> dict:
+    """Merges the given fields into the caller's Firestore profile.
+
+    Only fields that are not None are written, so a name-only update never
+    touches the stored email and vice versa. Password changes never reach
+    this function, they happen entirely client-side via the Firebase Auth
+    SDK and are never mirrored into Firestore.
+    """
+    db = get_firestore_client()
+    doc_ref = db.collection(USERS_COLLECTION).document(uid)
+    updates = {
+        key: value
+        for key, value in {"display_name": display_name, "email": email}.items()
+        if value is not None
+    }
+    if updates:
+        doc_ref.update(updates)
+    return {"uid": uid, **doc_ref.get().to_dict()}
+
+
 def get_current_user(request: Request) -> dict:
     """Verifies the Firebase ID token on the request and returns the caller's
     Firestore profile (uid, email, display_name, role). Raises 401 if the
