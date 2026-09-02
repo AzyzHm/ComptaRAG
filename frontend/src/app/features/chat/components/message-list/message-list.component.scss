@@ -7,7 +7,16 @@
   padding: $spacing-lg;
   display: flex;
   flex-direction: column;
+}
+
+.message-list__inner {
+  display: flex;
+  flex-direction: column;
   gap: $spacing-md;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  flex: 1;
 }
 
 .message-list__empty {

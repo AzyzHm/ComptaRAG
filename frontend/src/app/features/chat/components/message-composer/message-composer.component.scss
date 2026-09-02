@@ -24,6 +24,9 @@
   align-items: flex-end;
   gap: $spacing-sm;
   padding: $spacing-xs;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
   background-color: $color-paper;
   border: 1px solid $color-rule;
   border-radius: $radius-xl;
