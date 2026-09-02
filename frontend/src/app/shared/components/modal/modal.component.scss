@@ -1,0 +1,113 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-lg;
+  background-color: rgba(28, 43, 34, 0.32);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: modal-fade 0.18s $ease-out;
+}
+
+.modal-panel {
+  width: 100%;
+  max-width: 420px;
+  max-height: calc(100vh - #{$spacing-xl});
+  overflow-y: auto;
+  background-color: $color-paper-raised;
+  border: 1px solid $glass-border;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-floating;
+  animation: modal-rise 0.24s $ease-spring;
+
+  &__header {
+    position: sticky;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $spacing-md;
+    padding: $spacing-lg $spacing-lg $spacing-sm;
+    background-color: $color-paper-raised;
+  }
+
+  &__title {
+    font-family: $font-display;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: $color-ink;
+    margin: 0;
+  }
+
+  &__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    border-radius: $radius-pill;
+    background: transparent;
+    color: $color-ink-muted;
+    cursor: pointer;
+    transition:
+      background-color 0.15s $ease-out,
+      transform 0.15s $ease-spring-snappy;
+    @include focus-ring;
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    &:hover {
+      background-color: rgba($color-ink, 0.06);
+      color: $color-ink;
+    }
+
+    &:active {
+      transform: scale(0.92);
+    }
+  }
+
+  &__body {
+    padding: 0 $spacing-lg $spacing-lg;
+  }
+}
+
+@keyframes modal-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modal-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@include reduced-motion {
+  .modal-backdrop {
+    animation: none;
+  }
+
+  .modal-panel {
+    animation: none;
+  }
+}
