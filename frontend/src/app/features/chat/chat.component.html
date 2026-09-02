@@ -1,9 +1,23 @@
-<section class="chat">
-  <app-message-list [messages]="messages()" [pending]="pending()" />
+<div class="chat-shell">
+  <app-chat-sidebar
+    [chats]="chats()"
+    [activeChatId]="activeChatId()"
+    [loading]="chatsLoading()"
+    [collapsed]="sidebarCollapsed()"
+    (newChat)="startNewChat()"
+    (selectChat)="openChat($event)"
+    (renameChat)="renameChat($event)"
+    (deleteChat)="deleteChat($event)"
+    (toggleCollapsed)="toggleSidebar()"
+  />
 
-  @if (error()) {
-    <p class="chat__error" role="alert">{{ error() }}</p>
-  }
+  <section class="chat-shell__conversation">
+    @if (error()) {
+      <p class="chat-shell__error" role="alert">{{ error() }}</p>
+    }
 
-  <app-message-composer [disabled]="pending()" (submitted)="submitQuery($event)" />
-</section>
+    <app-message-list [messages]="messages()" [pending]="pending()" />
+
+    <app-message-composer [disabled]="pending()" (submitted)="submitQuery($event)" />
+  </section>
+</div>

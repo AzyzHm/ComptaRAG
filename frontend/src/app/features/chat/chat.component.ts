@@ -1,59 +1,169 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { finalize } from 'rxjs';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router } from '@angular/router';
+import { finalize, firstValueFrom } from 'rxjs';
 
 import { ChatApiService } from '@core/services/chat-api.service';
-import { ChatMessage } from '@core/models/chat.model';
+import { ChatMessage, ChatSummary } from '@core/models/chat.model';
+import { ChatSidebarComponent } from './components/chat-sidebar/chat-sidebar.component';
 import { MessageListComponent } from './components/message-list/message-list.component';
 import { MessageComposerComponent } from './components/message-composer/message-composer.component';
 
-let nextId = 0;
+let localMessageCounter = 0;
 
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [MessageListComponent, MessageComposerComponent],
+  imports: [ChatSidebarComponent, MessageListComponent, MessageComposerComponent],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChatComponent {
   private readonly chatApi = inject(ChatApiService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
+  private lastLoadedChatId: string | null = null;
+
+  protected readonly chats = signal<ChatSummary[]>([]);
+  protected readonly chatsLoading = signal(true);
+  protected readonly sidebarCollapsed = signal(false);
+
+  protected readonly activeChatId = signal<string | null>(null);
   protected readonly messages = signal<ChatMessage[]>([]);
+  protected readonly conversationLoading = signal(false);
+
   protected readonly pending = signal(false);
   protected readonly error = signal<string | null>(null);
 
-  protected submitQuery(query: string): void {
+  constructor() {
+    this.loadChats();
+
+    this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
+      const chatId = params.get('chatId');
+      this.activeChatId.set(chatId);
+      this.error.set(null);
+
+      if (!chatId) {
+        this.messages.set([]);
+        this.lastLoadedChatId = null;
+        return;
+      }
+
+      if (chatId !== this.lastLoadedChatId) {
+        this.loadConversation(chatId);
+      }
+    });
+  }
+
+  protected startNewChat(): void {
+    void this.router.navigate(['/chat']);
+  }
+
+  protected openChat(chatId: string): void {
+    void this.router.navigate(['/chat', chatId]);
+  }
+
+  protected toggleSidebar(): void {
+    this.sidebarCollapsed.update((collapsed) => !collapsed);
+  }
+
+  protected async renameChat(event: { id: string; title: string }): Promise<void> {
+    try {
+      await firstValueFrom(this.chatApi.renameChat(event.id, event.title));
+      this.chats.update((list) =>
+        list.map((chat) => (chat.id === event.id ? { ...chat, title: event.title } : chat))
+      );
+    } catch {
+      this.error.set('Could not rename that chat, please try again.');
+    }
+  }
+
+  protected async deleteChat(chatId: string): Promise<void> {
+    try {
+      await firstValueFrom(this.chatApi.deleteChat(chatId));
+      this.chats.update((list) => list.filter((chat) => chat.id !== chatId));
+      if (this.activeChatId() === chatId) {
+        void this.router.navigate(['/chat']);
+      }
+    } catch {
+      this.error.set('Could not delete that chat, please try again.');
+    }
+  }
+
+  protected async submitQuery(query: string): Promise<void> {
     const trimmed = query.trim();
     if (!trimmed || this.pending()) {
       return;
     }
 
     this.error.set(null);
-    this.appendMessage({ role: 'user', content: trimmed });
     this.pending.set(true);
+    this.appendLocalMessage({ role: 'user', content: trimmed });
+
+    try {
+      let chatId = this.activeChatId();
+
+      if (!chatId) {
+        const chat = await firstValueFrom(this.chatApi.createChat());
+        chatId = chat.id;
+        this.activeChatId.set(chatId);
+        this.lastLoadedChatId = chatId;
+        this.chats.update((list) => [chat, ...list]);
+        await this.router.navigate(['/chat', chatId], { replaceUrl: true });
+      }
+
+      const result = await firstValueFrom(this.chatApi.sendMessage(chatId, trimmed));
+      this.appendLocalMessage({
+        role: 'assistant',
+        content: result.response,
+        category: result.category
+      });
+      this.loadChats();
+    } catch {
+      this.error.set('Something went wrong reaching ComptaRAG, please try asking again.');
+    } finally {
+      this.pending.set(false);
+    }
+  }
+
+  private loadChats(): void {
+    this.chatApi
+      .listChats()
+      .pipe(finalize(() => this.chatsLoading.set(false)))
+      .subscribe({
+        next: (chats) => this.chats.set(chats),
+        error: () => this.error.set('Could not load your chat history.')
+      });
+  }
+
+  private loadConversation(chatId: string): void {
+    this.conversationLoading.set(true);
+    this.messages.set([]);
 
     this.chatApi
-      .ask(trimmed)
-      .pipe(finalize(() => this.pending.set(false)))
+      .getChat(chatId)
+      .pipe(finalize(() => this.conversationLoading.set(false)))
       .subscribe({
-        next: (result) => {
-          this.appendMessage({
-            role: 'assistant',
-            content: result.response,
-            category: result.category
-          });
+        next: (chat) => {
+          this.messages.set(chat.messages);
+          this.lastLoadedChatId = chatId;
         },
         error: () => {
-          this.error.set('Something went wrong reaching ComptaRAG. Please try asking again.');
+          this.error.set('That chat could not be found.');
+          void this.router.navigate(['/chat']);
         }
       });
   }
 
-  private appendMessage(message: Omit<ChatMessage, 'id' | 'createdAt'>): void {
+  private appendLocalMessage(
+    message: Pick<ChatMessage, 'role' | 'content'> & Partial<ChatMessage>
+  ): void {
     this.messages.update((current) => [
       ...current,
-      { ...message, id: `msg-${++nextId}`, createdAt: Date.now() }
+      { id: `local-${++localMessageCounter}`, ...message } as ChatMessage
     ]);
   }
 }
