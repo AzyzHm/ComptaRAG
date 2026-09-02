@@ -73,3 +73,48 @@ class TestReadCurrentUser:
         client.get("/auth/me")
 
         assert len(fake_db.collection("login_events").stream()) == 2
+
+
+class TestUpdateCurrentUser:
+    def test_updates_display_name(self, auth_client):
+        client, _fake_db = auth_client(
+            current_user={"uid": "u1", "email": "a@a.com", "role": "USER"},
+            users={"u1": {"email": "a@a.com", "display_name": "Old", "role": "USER"}},
+        )
+
+        response = client.patch("/auth/me", json={"display_name": "New Name"})
+
+        assert response.status_code == 200
+        assert response.json()["display_name"] == "New Name"
+
+    def test_updates_email(self, auth_client):
+        client, _fake_db = auth_client(
+            current_user={"uid": "u1", "email": "old@a.com", "role": "USER"},
+            users={"u1": {"email": "old@a.com", "role": "USER"}},
+        )
+
+        response = client.patch("/auth/me", json={"email": "new@a.com"})
+
+        assert response.status_code == 200
+        assert response.json()["email"] == "new@a.com"
+
+    def test_persists_the_change_in_firestore(self, auth_client):
+        client, fake_db = auth_client(
+            current_user={"uid": "u1", "email": "a@a.com", "role": "USER"},
+            users={"u1": {"email": "a@a.com", "role": "USER"}},
+        )
+
+        client.patch("/auth/me", json={"display_name": "Persisted"})
+
+        profile = fake_db.collection("users").document("u1").get().to_dict()
+        assert profile["display_name"] == "Persisted"
+
+    def test_partial_update_leaves_role_untouched(self, auth_client):
+        client, _fake_db = auth_client(
+            current_user={"uid": "u1", "email": "a@a.com", "role": "ADMIN"},
+            users={"u1": {"email": "a@a.com", "role": "ADMIN"}},
+        )
+
+        response = client.patch("/auth/me", json={"display_name": "New"})
+
+        assert response.json()["role"] == "ADMIN"
