@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { filter } from 'rxjs';
 
 import { HeaderComponent } from '@app/layout/header/header.component';
 import { FooterComponent } from '@app/layout/footer/footer.component';
@@ -13,5 +15,17 @@ import { FooterComponent } from '@app/layout/footer/footer.component';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent {
-  protected readonly title = 'angular-custom-template';
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
+
+  protected readonly isChatRoute = signal(this.router.url.startsWith('/chat'));
+
+  constructor() {
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe((event) => this.isChatRoute.set(event.urlAfterRedirects.startsWith('/chat')));
+  }
 }

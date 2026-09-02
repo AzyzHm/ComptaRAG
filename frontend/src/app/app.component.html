@@ -1,7 +1,9 @@
 <app-header />
 
-<main class="app-content">
+<main class="app-content" [class.app-content--full]="isChatRoute()">
   <router-outlet />
 </main>
 
-<app-footer />
+@if (!isChatRoute()) {
+  <app-footer />
+}
