@@ -7,6 +7,10 @@
   padding: $spacing-lg;
   display: flex;
   flex-direction: column;
+
+  @media (max-width: $breakpoint-sm) {
+    padding: $spacing-md;
+  }
 }
 
 .message-list__inner {
@@ -93,6 +97,10 @@
   border-radius: $radius-lg;
   padding: $spacing-sm $spacing-md;
   max-width: 80%;
+
+  @media (max-width: $breakpoint-sm) {
+    max-width: 92%;
+  }
 
   &--user {
     background-color: $color-ledger-teal;

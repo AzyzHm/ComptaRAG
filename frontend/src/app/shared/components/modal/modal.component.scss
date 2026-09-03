@@ -13,6 +13,11 @@
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   animation: modal-fade 0.18s $ease-out;
+
+  @media (max-width: $breakpoint-sm) {
+    padding: $spacing-sm;
+    align-items: flex-end;
+  }
 }
 
 .modal-panel {
@@ -26,6 +31,12 @@
   box-shadow: $shadow-floating;
   animation: modal-rise 0.24s $ease-spring;
 
+  @media (max-width: $breakpoint-sm) {
+    max-height: calc(100vh - #{$spacing-lg});
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
   &__header {
     position: sticky;
     top: 0;
@@ -35,6 +46,10 @@
     gap: $spacing-md;
     padding: $spacing-lg $spacing-lg $spacing-sm;
     background-color: $color-paper-raised;
+
+    @media (max-width: $breakpoint-sm) {
+      padding: $spacing-md $spacing-md $spacing-sm;
+    }
   }
 
   &__title {
@@ -79,6 +94,10 @@
 
   &__body {
     padding: 0 $spacing-lg $spacing-lg;
+
+    @media (max-width: $breakpoint-sm) {
+      padding: 0 $spacing-md $spacing-md;
+    }
   }
 }
 

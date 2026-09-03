@@ -7,6 +7,10 @@
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border-top: 1px solid $glass-border;
+
+  @media (max-width: $breakpoint-sm) {
+    padding: $spacing-sm $spacing-md;
+  }
 }
 
 .composer__label {
@@ -54,6 +58,10 @@
 
   &::placeholder {
     color: $color-ink-muted;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    font-size: 1rem;
   }
 }
 

@@ -16,6 +16,11 @@
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border-bottom: 1px solid $glass-border;
 
+  @media (max-width: $breakpoint-sm) {
+    padding: $spacing-sm $spacing-md;
+    gap: $spacing-sm;
+  }
+
   &__brand-group {
     display: flex;
     align-items: baseline;
