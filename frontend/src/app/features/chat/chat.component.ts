@@ -30,6 +30,7 @@ export class ChatComponent {
   protected readonly chats = signal<ChatSummary[]>([]);
   protected readonly chatsLoading = signal(true);
   protected readonly sidebarCollapsed = signal(false);
+  protected readonly mobileSidebarOpen = signal(false);
 
   protected readonly activeChatId = signal<string | null>(null);
   protected readonly messages = signal<ChatMessage[]>([]);
@@ -59,15 +60,25 @@ export class ChatComponent {
   }
 
   protected startNewChat(): void {
+    this.mobileSidebarOpen.set(false);
     void this.router.navigate(['/chat']);
   }
 
   protected openChat(chatId: string): void {
+    this.mobileSidebarOpen.set(false);
     void this.router.navigate(['/chat', chatId]);
   }
 
   protected toggleSidebar(): void {
     this.sidebarCollapsed.update((collapsed) => !collapsed);
+  }
+
+  protected toggleMobileSidebar(): void {
+    this.mobileSidebarOpen.update((open) => !open);
+  }
+
+  protected closeMobileSidebar(): void {
+    this.mobileSidebarOpen.set(false);
   }
 
   protected async renameChat(event: { id: string; title: string }): Promise<void> {

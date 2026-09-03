@@ -200,4 +200,66 @@ describe('ChatComponent', () => {
 
     expect(navigate).toHaveBeenCalledWith(['/chat']);
   });
+
+  it('opens the mobile sidebar drawer when the hamburger toggle is clicked', async () => {
+    const { route } = activatedRouteStub();
+    const chatApi = makeChatApi();
+
+    await render(ChatComponent, {
+      providers: [
+        { provide: ChatApiService, useValue: chatApi },
+        { provide: ActivatedRoute, useValue: route },
+        { provide: Router, useValue: { navigate: jest.fn() } }
+      ]
+    });
+
+    expect(screen.queryByRole('button', { name: /close chat list/i })).toBeNull();
+
+    await userEvent.setup().click(screen.getByRole('button', { name: /open chat list/i }));
+
+    expect(screen.getByRole('button', { name: /close chat list/i })).toBeTruthy();
+  });
+
+  it('closes the mobile sidebar drawer after selecting a chat', async () => {
+    const { route } = activatedRouteStub();
+    const chats: ChatSummary[] = [{ id: 'c1', owner_uid: 'u1', title: 'IFRS 16 questions' }];
+    const navigate = jest.fn().mockResolvedValue(true);
+    const chatApi = makeChatApi({ listChats: jest.fn().mockReturnValue(of(chats)) });
+
+    await render(ChatComponent, {
+      providers: [
+        { provide: ChatApiService, useValue: chatApi },
+        { provide: ActivatedRoute, useValue: route },
+        { provide: Router, useValue: { navigate } }
+      ]
+    });
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: /open chat list/i }));
+    expect(screen.getByRole('button', { name: /close chat list/i })).toBeTruthy();
+
+    await user.click(await screen.findByText('IFRS 16 questions'));
+
+    expect(navigate).toHaveBeenCalledWith(['/chat', 'c1']);
+    expect(screen.queryByRole('button', { name: /close chat list/i })).toBeNull();
+  });
+
+  it('closes the mobile sidebar drawer when the backdrop is dismissed', async () => {
+    const { route } = activatedRouteStub();
+    const chatApi = makeChatApi();
+
+    await render(ChatComponent, {
+      providers: [
+        { provide: ChatApiService, useValue: chatApi },
+        { provide: ActivatedRoute, useValue: route },
+        { provide: Router, useValue: { navigate: jest.fn() } }
+      ]
+    });
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: /open chat list/i }));
+    await user.click(screen.getByRole('button', { name: /close chat list/i }));
+
+    expect(screen.queryByRole('button', { name: /close chat list/i })).toBeNull();
+  });
 });
