@@ -1,0 +1,68 @@
+<div class="theme-toggle" role="group" aria-label="Theme">
+  <button
+    type="button"
+    class="theme-toggle__option"
+    [class.theme-toggle__option--active]="themeService.preference() === 'light'"
+    [attr.aria-pressed]="themeService.preference() === 'light'"
+    aria-label="Light theme"
+    title="Light"
+    (click)="select('light')"
+  >
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="4.25" stroke="currentColor" stroke-width="1.7" />
+      <path
+        d="M12 2.5v2.25M12 19.25v2.25M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.25M19.25 12h2.25M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"
+        stroke="currentColor"
+        stroke-width="1.7"
+        stroke-linecap="round"
+      />
+    </svg>
+  </button>
+
+  <button
+    type="button"
+    class="theme-toggle__option"
+    [class.theme-toggle__option--active]="themeService.preference() === 'dark'"
+    [attr.aria-pressed]="themeService.preference() === 'dark'"
+    aria-label="Dark theme"
+    title="Dark"
+    (click)="select('dark')"
+  >
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M20.5 14.2A8.5 8.5 0 1 1 9.8 3.5a7 7 0 0 0 10.7 10.7Z"
+        stroke="currentColor"
+        stroke-width="1.7"
+        stroke-linejoin="round"
+      />
+    </svg>
+  </button>
+
+  <button
+    type="button"
+    class="theme-toggle__option"
+    [class.theme-toggle__option--active]="themeService.preference() === 'system'"
+    [attr.aria-pressed]="themeService.preference() === 'system'"
+    aria-label="Match system theme"
+    title="System"
+    (click)="select('system')"
+  >
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect
+        x="2.5"
+        y="4.5"
+        width="19"
+        height="12"
+        rx="1.6"
+        stroke="currentColor"
+        stroke-width="1.7"
+      />
+      <path
+        d="M8.5 20.5h7M12 16.5v4"
+        stroke="currentColor"
+        stroke-width="1.7"
+        stroke-linecap="round"
+      />
+    </svg>
+  </button>
+</div>
