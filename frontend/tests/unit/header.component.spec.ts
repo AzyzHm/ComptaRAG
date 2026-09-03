@@ -81,4 +81,10 @@ describe('HeaderComponent', () => {
     expect(screen.queryByRole('heading', { name: 'Your profile' })).toBeNull();
     expect(screen.getByText('Sign in')).toBeTruthy();
   });
+
+  it('renders the theme toggle regardless of auth state', async () => {
+    await renderHeader({ isAuthenticated: () => false });
+
+    expect(screen.getByRole('group', { name: 'Theme' })).toBeTruthy();
+  });
 });

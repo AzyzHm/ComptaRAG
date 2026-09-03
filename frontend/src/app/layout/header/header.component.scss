@@ -67,6 +67,12 @@
     }
   }
 
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+  }
+
   &__account {
     display: flex;
     align-items: center;
@@ -88,7 +94,7 @@
     @include focus-ring;
 
     &:hover {
-      background-color: rgba($color-ink, 0.06);
+      background-color: tint($color-ink, 6%);
     }
 
     &:active {

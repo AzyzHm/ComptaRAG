@@ -5,11 +5,18 @@ import { AuthService } from '@core/services/auth.service';
 import { ProfileModalComponent } from '@features/account/profile-modal/profile-modal.component';
 import { ButtonComponent } from '@shared/components/button/button.component';
 import { RoleBadgeComponent } from '@shared/components/role-badge/role-badge.component';
+import { ThemeToggleComponent } from '@shared/components/theme-toggle/theme-toggle.component';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [RouterLink, ButtonComponent, RoleBadgeComponent, ProfileModalComponent],
+  imports: [
+    RouterLink,
+    ButtonComponent,
+    RoleBadgeComponent,
+    ProfileModalComponent,
+    ThemeToggleComponent
+  ],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
