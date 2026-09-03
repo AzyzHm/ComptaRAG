@@ -3,8 +3,6 @@
 
 .composer {
   padding: $spacing-md $spacing-lg;
-  // Translucent material floating over the message list, per Apple's
-  // toolbar treatment: content scrolls underneath, chrome stays glassy.
   background-color: $glass-paper;
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
@@ -33,7 +31,7 @@
   transition: box-shadow 0.2s $ease-out;
 
   &:focus-within {
-    box-shadow: 0 0 0 3px rgba($color-ledger-teal, 0.15);
+    box-shadow: 0 0 0 3px tint($color-ledger-teal, 15%);
     border-color: $color-ledger-teal;
   }
 }
