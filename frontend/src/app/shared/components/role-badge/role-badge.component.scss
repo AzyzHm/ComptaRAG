@@ -15,16 +15,16 @@
 
   &--user {
     color: $color-ink-muted;
-    background-color: rgba($color-ink-muted, 0.08);
+    background-color: tint($color-ink-muted, 8%);
   }
 
   &--admin {
     color: $color-ledger-teal-dark;
-    background-color: rgba($color-ledger-teal, 0.08);
+    background-color: tint($color-ledger-teal, 8%);
   }
 
   &--super-admin {
     color: $color-fiscal-ochre-dark;
-    background-color: rgba($color-fiscal-ochre, 0.1);
+    background-color: tint($color-fiscal-ochre, 10%);
   }
 }

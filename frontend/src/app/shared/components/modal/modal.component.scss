@@ -68,7 +68,7 @@
     }
 
     &:hover {
-      background-color: rgba($color-ink, 0.06);
+      background-color: tint($color-ink, 6%);
       color: $color-ink;
     }
 

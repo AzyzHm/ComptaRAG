@@ -1,9 +1,6 @@
 @use '../../../../styles/variables' as *;
 @use '../../../../styles/mixins' as *;
 
-// The signature element: an ink-stamp badge, like a rubber date-stamp on a
-// paper ledger entry. Restrained everywhere else in the UI so this is the
-// one place that carries personality.
 .category-badge {
   display: inline-block;
   font-family: $font-mono;
@@ -19,17 +16,17 @@
 
   &--ifrs {
     color: $color-ledger-teal-dark;
-    background-color: rgba($color-ledger-teal, 0.08);
+    background-color: tint($color-ledger-teal, 8%);
   }
 
   &--fiscal {
     color: $color-fiscal-ochre-dark;
-    background-color: rgba($color-fiscal-ochre, 0.1);
+    background-color: tint($color-fiscal-ochre, 10%);
   }
 
   &--other {
     color: $color-ink-muted;
-    background-color: rgba($color-ink-muted, 0.08);
+    background-color: tint($color-ink-muted, 8%);
   }
 
   @include reduced-motion {
