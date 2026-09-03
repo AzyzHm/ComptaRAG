@@ -15,6 +15,45 @@
   &--collapsed {
     width: 64px;
   }
+
+  @media (max-width: $breakpoint-md) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 60;
+    width: min(84vw, 300px);
+    box-shadow: $shadow-floating;
+    transform: translateX(-100%);
+    transition: transform 0.25s $ease-spring;
+
+    &--mobile-open {
+      transform: translateX(0);
+    }
+  }
+}
+
+.sidebar__backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  border: none;
+  padding: 0;
+  background-color: rgba(28, 43, 34, 0.32);
+  animation: sidebar-backdrop-fade 0.18s $ease-out;
+
+  @media (max-width: $breakpoint-md) {
+    display: block;
+  }
+}
+
+@keyframes sidebar-backdrop-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .sidebar__top {
@@ -116,6 +155,7 @@
   border-radius: $radius-sm;
   cursor: pointer;
   transition: background-color 0.15s $ease-out;
+  @include focus-ring;
 
   &:hover {
     background-color: tint($color-ink, 5%);
@@ -206,5 +246,9 @@
   .sidebar__skeleton-row {
     animation: none;
     opacity: 0.6;
+  }
+
+  .sidebar__backdrop {
+    animation: none;
   }
 }

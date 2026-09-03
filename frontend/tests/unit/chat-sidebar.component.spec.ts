@@ -125,4 +125,65 @@ describe('ChatSidebarComponent', () => {
 
     expect(onToggleCollapsed).toHaveBeenCalled();
   });
+
+  it('emits selectChat when a row is activated with the keyboard', async () => {
+    const onSelectChat = jest.fn();
+
+    await render(`<app-chat-sidebar [chats]="chats" (selectChat)="onSelectChat($event)" />`, {
+      imports: [ChatSidebarComponent],
+      componentProperties: { chats, onSelectChat }
+    });
+
+    screen
+      .getByText('IFRS 16 questions')
+      .closest('[role="button"]')
+      ?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+
+    expect(onSelectChat).toHaveBeenCalledWith('c1');
+  });
+
+  it('does not render a backdrop when the mobile drawer is closed', async () => {
+    await render(ChatSidebarComponent, {
+      componentInputs: {
+        chats,
+        activeChatId: null,
+        loading: false,
+        collapsed: false,
+        mobileOpen: false
+      }
+    });
+
+    expect(screen.queryByRole('button', { name: /close chat list/i })).toBeNull();
+  });
+
+  it('emits closeMobile when the backdrop is clicked while the drawer is open', async () => {
+    const onCloseMobile = jest.fn();
+
+    await render(
+      `<app-chat-sidebar [chats]="chats" [mobileOpen]="true" (closeMobile)="onCloseMobile()" />`,
+      {
+        imports: [ChatSidebarComponent],
+        componentProperties: { chats, onCloseMobile }
+      }
+    );
+
+    await userEvent.setup().click(screen.getByRole('button', { name: /close chat list/i }));
+
+    expect(onCloseMobile).toHaveBeenCalled();
+  });
+
+  it('shows full content in the mobile drawer even if the desktop rail is collapsed', async () => {
+    await render(ChatSidebarComponent, {
+      componentInputs: {
+        chats,
+        activeChatId: null,
+        loading: false,
+        collapsed: true,
+        mobileOpen: true
+      }
+    });
+
+    expect(screen.getByText('IFRS 16 questions')).toBeTruthy();
+    expect(screen.getByText('New chat')).toBeTruthy();
+  });
 });

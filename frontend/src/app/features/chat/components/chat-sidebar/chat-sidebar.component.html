@@ -1,4 +1,17 @@
-<aside class="sidebar" [class.sidebar--collapsed]="collapsed">
+@if (mobileOpen) {
+  <button
+    type="button"
+    class="sidebar__backdrop"
+    aria-label="Close chat list"
+    (click)="closeMobile.emit()"
+  ></button>
+}
+
+<aside
+  class="sidebar"
+  [class.sidebar--collapsed]="collapsed"
+  [class.sidebar--mobile-open]="mobileOpen"
+>
   <div class="sidebar__top">
     <button
       type="button"
@@ -21,13 +34,13 @@
           stroke-linecap="round"
         />
       </svg>
-      @if (!collapsed) {
+      @if (expanded) {
         <span>New chat</span>
       }
     </button>
   </div>
 
-  @if (!collapsed) {
+  @if (expanded) {
     <nav class="sidebar__list" aria-label="Chat history">
       @if (loading) {
         <div class="sidebar__skeleton">
@@ -41,8 +54,12 @@
         @for (chat of chats; track chat.id) {
           <div
             class="sidebar__item"
+            role="button"
+            tabindex="0"
             [class.sidebar__item--active]="chat.id === activeChatId"
-            (click)="selectChat.emit(chat.id)"
+            (click)="onSelect(chat.id)"
+            (keydown.enter)="onSelect(chat.id)"
+            (keydown.space)="$event.preventDefault(); onSelect(chat.id)"
           >
             @if (editingChatId() === chat.id) {
               <input
@@ -54,7 +71,7 @@
                 (keydown.enter)="confirmRename(chat.id)"
                 (keydown.escape)="cancelRename()"
                 (blur)="confirmRename(chat.id)"
-                autofocus
+                appAutofocus
               />
             } @else {
               <span class="sidebar__item-title">{{ chat.title }}</span>
