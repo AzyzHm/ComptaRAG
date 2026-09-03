@@ -11,40 +11,42 @@
   @if (loading()) {
     <p class="admin-users__status">Loading users…</p>
   } @else {
-    <table class="admin-users__table">
-      <thead>
-        <tr>
-          <th>Email</th>
-          <th>Name</th>
-          <th>Role</th>
-          <th>Change role</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (user of users(); track user.uid) {
+    <div class="admin-users__table-wrapper">
+      <table class="admin-users__table">
+        <thead>
           <tr>
-            <td>{{ user.email ?? '—' }}</td>
-            <td>{{ user.display_name ?? '—' }}</td>
-            <td><app-role-badge [role]="user.role" /></td>
-            <td>
-              @if (canEditRole(user)) {
-                <select
-                  class="admin-users__select"
-                  [ngModel]="user.role"
-                  (ngModelChange)="changeRole(user, $event)"
-                  [disabled]="pendingUid() === user.uid"
-                >
-                  @for (role of availableRolesFor(user); track role) {
-                    <option [value]="role">{{ role }}</option>
-                  }
-                </select>
-              } @else {
-                <span class="admin-users__locked">—</span>
-              }
-            </td>
+            <th>Email</th>
+            <th>Name</th>
+            <th>Role</th>
+            <th>Change role</th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (user of users(); track user.uid) {
+            <tr>
+              <td>{{ user.email ?? '—' }}</td>
+              <td>{{ user.display_name ?? '—' }}</td>
+              <td><app-role-badge [role]="user.role" /></td>
+              <td>
+                @if (canEditRole(user)) {
+                  <select
+                    class="admin-users__select"
+                    [ngModel]="user.role"
+                    (ngModelChange)="changeRole(user, $event)"
+                    [disabled]="pendingUid() === user.uid"
+                  >
+                    @for (role of availableRolesFor(user); track role) {
+                      <option [value]="role">{{ role }}</option>
+                    }
+                  </select>
+                } @else {
+                  <span class="admin-users__locked">—</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   }
 </section>

@@ -5,6 +5,10 @@
   @include flex-center;
   flex: 1;
   padding: $spacing-lg;
+
+  @media (max-width: $breakpoint-sm) {
+    padding: $spacing-md;
+  }
 }
 
 .auth__card {
@@ -20,6 +24,10 @@
   box-shadow: $shadow-floating;
 
   animation: auth-card-in 0.4s $ease-spring both;
+
+  @media (max-width: $breakpoint-sm) {
+    padding: $spacing-lg $spacing-md;
+  }
 }
 
 .auth__title {
@@ -82,6 +90,10 @@
 
   &--with-action {
     padding-right: 44px;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    font-size: 1rem;
   }
 }
 

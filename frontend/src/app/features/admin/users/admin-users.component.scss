@@ -6,6 +6,10 @@
   max-width: 900px;
   margin: 0 auto;
   padding: $spacing-lg;
+
+  @media (max-width: $breakpoint-sm) {
+    padding: $spacing-md;
+  }
 }
 
 .admin-users__title {
@@ -31,13 +35,19 @@
   color: $color-ink-muted;
 }
 
-.admin-users__table {
+.admin-users__table-wrapper {
   width: 100%;
-  border-collapse: collapse;
-  background-color: $color-paper-raised;
+  overflow-x: auto;
   border: 1px solid $color-rule;
   border-radius: $radius-md;
-  overflow: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-users__table {
+  width: 100%;
+  min-width: 480px;
+  border-collapse: collapse;
+  background-color: $color-paper-raised;
 
   th,
   td {
@@ -45,6 +55,7 @@
     padding: $spacing-sm $spacing-md;
     border-bottom: 1px solid $color-rule;
     font-size: 0.875rem;
+    white-space: nowrap;
   }
 
   th {
