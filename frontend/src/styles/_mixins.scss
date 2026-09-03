@@ -1,5 +1,9 @@
 @use 'variables' as *;
 
+@function tint($color, $percent) {
+  @return color-mix(in srgb, #{$color} #{$percent}, transparent);
+}
+
 @mixin flex-center {
   display: flex;
   align-items: center;
