@@ -20,5 +20,13 @@
   &--full {
     padding: 0;
     justify-content: stretch;
+
+    > app-chat {
+      display: flex;
+      flex: 1;
+      width: 100%;
+      min-width: 0;
+      min-height: 0;
+    }
   }
 }
