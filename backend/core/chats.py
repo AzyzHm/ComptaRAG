@@ -1,25 +1,49 @@
+import re
+
 from google.cloud.firestore_v1 import SERVER_TIMESTAMP
 
 from config.firebase import get_firestore_client
 
 CHATS_COLLECTION = "chats"
 MESSAGES_SUBCOLLECTION = "messages"
-DEFAULT_TITLE = "New chat"
+DEFAULT_TITLE = "Untitled chat"
 MAX_HISTORY_MESSAGES = 10
 TITLE_MAX_LENGTH = 60
+
+_UNTITLED_SUFFIX_RE = re.compile(r"^Untitled chat \((\d+)\)$")
 
 
 def _chat_doc(db, chat_id: str):
     return db.collection(CHATS_COLLECTION).document(chat_id)
 
 
+def _next_untitled_title(owner_uid: str) -> str:
+    """Picks the next free "Untitled chat" / "Untitled chat (N)" title for
+    this owner, so a fresh chat never silently shares a name with one that
+    still has it. Only ever consulted for the auto-generated default,
+    a title the owner picks themselves through rename is never touched."""
+    existing = {chat["title"] for chat in list_chats(owner_uid)}
+    if DEFAULT_TITLE not in existing:
+        return DEFAULT_TITLE
+
+    used = {1}
+    for title in existing:
+        match = _UNTITLED_SUFFIX_RE.match(title)
+        if match:
+            used.add(int(match.group(1)))
+
+    next_n = max(used) + 1
+    return f"{DEFAULT_TITLE} ({next_n})"
+
+
 def create_chat(owner_uid: str) -> dict:
-    """Creates a new, empty chat owned by `owner_uid`."""
+    """Creates a new, empty chat owned by `owner_uid`, titled "Untitled
+    chat", or "Untitled chat (N)" if that title is already in use."""
     db = get_firestore_client()
     doc_ref = db.collection(CHATS_COLLECTION).document()
     chat = {
         "owner_uid": owner_uid,
-        "title": DEFAULT_TITLE,
+        "title": _next_untitled_title(owner_uid),
         "created_at": SERVER_TIMESTAMP,
         "updated_at": SERVER_TIMESTAMP,
     }
@@ -104,7 +128,11 @@ def delete_chat(chat_id: str) -> None:
 
 
 def title_from_query(query: str) -> str:
-    """Derives a short chat title from the first message's text."""
+    """Derives a short title from a message's text.
+
+    Not used to auto-title chats (they keep "Untitled chat" until the owner
+    renames one), kept as a small utility other callers might still want.
+    """
     trimmed = query.strip()
     if len(trimmed) <= TITLE_MAX_LENGTH:
         return trimmed or DEFAULT_TITLE
