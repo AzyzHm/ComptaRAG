@@ -1,7 +1,11 @@
 <section class="admin-users">
   <h1 class="admin-users__title">Manage users</h1>
   <p class="admin-users__subtitle">
-    Promote or demote accounts between User, Admin, and Super admin.
+    @if (viewerIsSuperAdmin()) {
+      Promote or demote accounts between User and Admin, or remove an account entirely.
+    } @else {
+      Accounts with the User role. Only the Super admin can change roles or remove an account.
+    }
   </p>
 
   @if (error()) {
@@ -18,7 +22,10 @@
             <th>Email</th>
             <th>Name</th>
             <th>Role</th>
-            <th>Change role</th>
+            @if (viewerIsSuperAdmin()) {
+              <th>Change role</th>
+              <th>Delete</th>
+            }
           </tr>
         </thead>
         <tbody>
@@ -27,22 +34,38 @@
               <td>{{ user.email ?? '—' }}</td>
               <td>{{ user.display_name ?? '—' }}</td>
               <td><app-role-badge [role]="user.role" /></td>
-              <td>
-                @if (canEditRole(user)) {
-                  <select
-                    class="admin-users__select"
-                    [ngModel]="user.role"
-                    (ngModelChange)="changeRole(user, $event)"
-                    [disabled]="pendingUid() === user.uid"
-                  >
-                    @for (role of availableRolesFor(user); track role) {
-                      <option [value]="role">{{ role }}</option>
-                    }
-                  </select>
-                } @else {
-                  <span class="admin-users__locked">—</span>
-                }
-              </td>
+              @if (viewerIsSuperAdmin()) {
+                <td>
+                  @if (canEditRole(user)) {
+                    <select
+                      class="admin-users__select"
+                      [ngModel]="user.role"
+                      (ngModelChange)="changeRole(user, $event)"
+                      [disabled]="pendingUid() === user.uid"
+                    >
+                      @for (role of assignableRoles; track role) {
+                        <option [value]="role">{{ role }}</option>
+                      }
+                    </select>
+                  } @else {
+                    <span class="admin-users__locked">—</span>
+                  }
+                </td>
+                <td>
+                  @if (canDelete(user)) {
+                    <button
+                      type="button"
+                      class="admin-users__delete"
+                      [disabled]="pendingUid() === user.uid"
+                      (click)="deleteUser(user)"
+                    >
+                      Delete
+                    </button>
+                  } @else {
+                    <span class="admin-users__locked">—</span>
+                  }
+                </td>
+              }
             </tr>
           }
         </tbody>

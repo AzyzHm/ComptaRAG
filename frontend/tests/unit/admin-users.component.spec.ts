@@ -7,21 +7,27 @@ import { AdminApiService } from '@core/services/admin-api.service';
 import { AuthService } from '@core/services/auth.service';
 import { UserProfile } from '@core/models/user.model';
 
-const users: UserProfile[] = [
-  { uid: 'viewer-uid', email: 'me@example.com', display_name: 'Me', role: 'ADMIN' },
+const usersForAdminViewer: UserProfile[] = [
   { uid: 'target-uid', email: 'them@example.com', display_name: 'Them', role: 'USER' }
+];
+
+const usersForSuperAdminViewer: UserProfile[] = [
+  { uid: 'target-uid', email: 'them@example.com', display_name: 'Them', role: 'USER' },
+  { uid: 'other-admin-uid', email: 'other-admin@example.com', display_name: 'Other', role: 'ADMIN' }
 ];
 
 function renderPage(
   viewerRole: 'ADMIN' | 'SUPER_ADMIN',
-  overrides: Partial<{ listUsers: jest.Mock; updateRole: jest.Mock }> = {}
+  users: UserProfile[],
+  overrides: Partial<{ listUsers: jest.Mock; updateRole: jest.Mock; deleteUser: jest.Mock }> = {}
 ) {
   const listUsers = overrides.listUsers ?? jest.fn().mockReturnValue(of(users));
   const updateRole = overrides.updateRole ?? jest.fn();
+  const deleteUser = overrides.deleteUser ?? jest.fn().mockReturnValue(of(undefined));
 
   return render(AdminUsersComponent, {
     providers: [
-      { provide: AdminApiService, useValue: { listUsers, updateRole } },
+      { provide: AdminApiService, useValue: { listUsers, updateRole, deleteUser } },
       {
         provide: AuthService,
         useValue: {
@@ -30,28 +36,27 @@ function renderPage(
         }
       }
     ]
-  }).then((result) => ({ result, listUsers, updateRole }));
+  }).then((result) => ({ result, listUsers, updateRole, deleteUser }));
 }
 
 describe('AdminUsersComponent', () => {
-  it('lists users with their roles', async () => {
-    await renderPage('ADMIN');
+  it('lists the accounts the backend returned', async () => {
+    await renderPage('ADMIN', usersForAdminViewer);
 
-    expect(await screen.findByText('me@example.com')).toBeTruthy();
-    expect(screen.getByText('them@example.com')).toBeTruthy();
+    expect(await screen.findByText('them@example.com')).toBeTruthy();
   });
 
-  it("does not offer a role selector for the viewer's own row", async () => {
-    await renderPage('ADMIN');
+  it('gives an ADMIN viewer no role selector or delete button at all', async () => {
+    await renderPage('ADMIN', usersForAdminViewer);
 
-    await screen.findByText('me@example.com');
-    const ownRow = screen.getByText('me@example.com').closest('tr') as HTMLElement;
-    expect(within(ownRow).queryByRole('combobox')).toBeNull();
+    await screen.findByText('them@example.com');
+    expect(screen.queryByRole('combobox')).toBeNull();
+    expect(screen.queryByRole('button', { name: /delete/i })).toBeNull();
   });
 
-  it('lets an ADMIN promote a USER to ADMIN, but not to SUPER_ADMIN', async () => {
-    const { updateRole } = await renderPage('ADMIN', {
-      updateRole: jest.fn().mockReturnValue(of({ ...users[1], role: 'ADMIN' }))
+  it('lets a SUPER_ADMIN promote a USER to ADMIN, offering only USER and ADMIN', async () => {
+    const { updateRole } = await renderPage('SUPER_ADMIN', usersForSuperAdminViewer, {
+      updateRole: jest.fn().mockReturnValue(of({ ...usersForSuperAdminViewer[0], role: 'ADMIN' }))
     });
 
     await screen.findByText('them@example.com');
@@ -67,19 +72,20 @@ describe('AdminUsersComponent', () => {
     expect(updateRole).toHaveBeenCalledWith('target-uid', 'ADMIN');
   });
 
-  it('offers SUPER_ADMIN as an option when the viewer is a SUPER_ADMIN', async () => {
-    await renderPage('SUPER_ADMIN');
+  it("does not offer a role selector or delete button for the SUPER_ADMIN's own row", async () => {
+    await renderPage('SUPER_ADMIN', [
+      ...usersForSuperAdminViewer,
+      { uid: 'viewer-uid', email: 'me@example.com', display_name: 'Me', role: 'ADMIN' }
+    ]);
 
-    await screen.findByText('them@example.com');
-    const targetRow = screen.getByText('them@example.com').closest('tr') as HTMLElement;
-    const select = within(targetRow).getByRole('combobox') as HTMLSelectElement;
-
-    const options = Array.from(select.options).map((o) => o.value);
-    expect(options).toEqual(['USER', 'ADMIN', 'SUPER_ADMIN']);
+    await screen.findByText('me@example.com');
+    const ownRow = screen.getByText('me@example.com').closest('tr') as HTMLElement;
+    expect(within(ownRow).queryByRole('combobox')).toBeNull();
+    expect(within(ownRow).queryByRole('button', { name: /delete/i })).toBeNull();
   });
 
   it('shows an error message when the role update fails', async () => {
-    await renderPage('SUPER_ADMIN', {
+    await renderPage('SUPER_ADMIN', usersForSuperAdminViewer, {
       updateRole: jest.fn().mockReturnValue(throwError(() => new Error('nope')))
     });
 
@@ -93,9 +99,59 @@ describe('AdminUsersComponent', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(/could not update/i);
   });
 
+  it('lets a SUPER_ADMIN delete an account after confirming', async () => {
+    const confirmSpy = jest.spyOn(window, 'confirm').mockReturnValue(true);
+    const { deleteUser } = await renderPage('SUPER_ADMIN', usersForSuperAdminViewer);
+
+    await screen.findByText('them@example.com');
+    const targetRow = screen.getByText('them@example.com').closest('tr') as HTMLElement;
+
+    const user = userEvent.setup();
+    await user.click(within(targetRow).getByRole('button', { name: /delete/i }));
+
+    expect(confirmSpy).toHaveBeenCalled();
+    expect(deleteUser).toHaveBeenCalledWith('target-uid');
+    expect(screen.queryByText('them@example.com')).toBeNull();
+
+    confirmSpy.mockRestore();
+  });
+
+  it('does not delete when the confirmation is declined', async () => {
+    const confirmSpy = jest.spyOn(window, 'confirm').mockReturnValue(false);
+    const { deleteUser } = await renderPage('SUPER_ADMIN', usersForSuperAdminViewer);
+
+    await screen.findByText('them@example.com');
+    const targetRow = screen.getByText('them@example.com').closest('tr') as HTMLElement;
+
+    const user = userEvent.setup();
+    await user.click(within(targetRow).getByRole('button', { name: /delete/i }));
+
+    expect(deleteUser).not.toHaveBeenCalled();
+    expect(screen.getByText('them@example.com')).toBeTruthy();
+
+    confirmSpy.mockRestore();
+  });
+
+  it('shows an error message when the delete fails', async () => {
+    jest.spyOn(window, 'confirm').mockReturnValue(true);
+    await renderPage('SUPER_ADMIN', usersForSuperAdminViewer, {
+      deleteUser: jest.fn().mockReturnValue(throwError(() => new Error('nope')))
+    });
+
+    await screen.findByText('them@example.com');
+    const targetRow = screen.getByText('them@example.com').closest('tr') as HTMLElement;
+
+    const user = userEvent.setup();
+    await user.click(within(targetRow).getByRole('button', { name: /delete/i }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/could not delete/i);
+
+    jest.restoreAllMocks();
+  });
+
   it('shows a status message while loading', async () => {
-    const listUsers = jest.fn().mockReturnValue(of(users));
-    await renderPage('ADMIN', { listUsers });
+    const listUsers = jest.fn().mockReturnValue(of(usersForAdminViewer));
+    await renderPage('ADMIN', usersForAdminViewer, { listUsers });
 
     expect(listUsers).toHaveBeenCalled();
   });
