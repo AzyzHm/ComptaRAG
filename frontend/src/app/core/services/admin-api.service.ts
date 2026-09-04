@@ -15,4 +15,8 @@ export class AdminApiService {
   updateRole(uid: string, role: Role): Observable<UserProfile> {
     return this.api.patch<UserProfile>(`/admin/users/${uid}/role`, { role });
   }
+
+  deleteUser(uid: string): Observable<void> {
+    return this.api.delete<void>(`/admin/users/${uid}`);
+  }
 }
