@@ -7,7 +7,7 @@ class TestCreateChat:
         assert response.status_code == 200
         body = response.json()
         assert body["owner_uid"] == "test-uid"
-        assert body["title"] == "New chat"
+        assert body["title"] == "Untitled chat"
         assert "id" in body
 
 
@@ -133,7 +133,7 @@ class TestSendMessage:
     def test_returns_answer_and_category_on_success(self, app):
         client, fake_graph, fake_db = app
         fake_db.collection("chats").document("c1").set(
-            {"owner_uid": "test-uid", "title": "New chat", "updated_at": 1}
+            {"owner_uid": "test-uid", "title": "Untitled chat", "updated_at": 1}
         )
         fake_graph.answer = "IFRS 16 requires lessees to recognize a right-of-use asset."
         fake_graph.category = "ifrs"
@@ -150,7 +150,7 @@ class TestSendMessage:
     def test_stores_both_the_user_and_assistant_messages(self, app):
         client, fake_graph, fake_db = app
         fake_db.collection("chats").document("c1").set(
-            {"owner_uid": "test-uid", "title": "New chat", "updated_at": 1}
+            {"owner_uid": "test-uid", "title": "Untitled chat", "updated_at": 1}
         )
         fake_graph.answer = "Sure, here's the answer."
 
@@ -181,17 +181,16 @@ class TestSendMessage:
         assert history[0]["content"] == "turn 2"
         assert history[-1]["content"] == "turn 11"
 
-    def test_titles_the_chat_from_the_first_message(self, app):
+    def test_does_not_title_the_chat_from_the_first_message(self, app):
         client, _fake_graph, fake_db = app
         fake_db.collection("chats").document("c1").set(
-            {"owner_uid": "test-uid", "title": "New chat", "updated_at": 1}
+            {"owner_uid": "test-uid", "title": "Untitled chat", "updated_at": 1}
         )
 
         client.post("/chats/c1/messages", json={"query": "What is a deferred tax asset?"})
 
         assert (
-            fake_db.collection("chats").document("c1").get().to_dict()["title"]
-            == "What is a deferred tax asset?"
+            fake_db.collection("chats").document("c1").get().to_dict()["title"] == "Untitled chat"
         )
 
     def test_does_not_retitle_an_already_titled_chat(self, app):
@@ -209,7 +208,7 @@ class TestSendMessage:
     def test_rolls_token_usage_into_the_caller_s_running_total(self, app):
         client, fake_graph, fake_db = app
         fake_db.collection("chats").document("c1").set(
-            {"owner_uid": "test-uid", "title": "New chat", "updated_at": 1}
+            {"owner_uid": "test-uid", "title": "Untitled chat", "updated_at": 1}
         )
         fake_graph.token_usage = {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15}
 
@@ -234,7 +233,7 @@ class TestSendMessage:
     def test_returns_500_with_error_detail_when_graph_raises(self, app):
         client, fake_graph, fake_db = app
         fake_db.collection("chats").document("c1").set(
-            {"owner_uid": "test-uid", "title": "New chat", "updated_at": 1}
+            {"owner_uid": "test-uid", "title": "Untitled chat", "updated_at": 1}
         )
         fake_graph.raise_exc = RuntimeError("LLM unavailable")
 
@@ -246,7 +245,7 @@ class TestSendMessage:
     def test_returns_422_when_query_field_missing(self, app):
         client, _fake_graph, fake_db = app
         fake_db.collection("chats").document("c1").set(
-            {"owner_uid": "test-uid", "title": "New chat", "updated_at": 1}
+            {"owner_uid": "test-uid", "title": "Untitled chat", "updated_at": 1}
         )
 
         response = client.post("/chats/c1/messages", json={})

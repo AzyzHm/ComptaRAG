@@ -14,8 +14,61 @@ class TestCreateChat:
         chat = chats_mod.create_chat("uid-1")
 
         assert chat["owner_uid"] == "uid-1"
-        assert chat["title"] == "New chat"
+        assert chat["title"] == "Untitled chat"
         assert "id" in chat
+
+    def test_second_untitled_chat_gets_a_numbered_suffix(self, monkeypatch):
+        fake_db = FakeFirestore(
+            seed={
+                "chats": {"c1": {"owner_uid": "uid-1", "title": "Untitled chat", "updated_at": 1}}
+            }
+        )
+        _wire(monkeypatch, fake_db)
+
+        chat = chats_mod.create_chat("uid-1")
+
+        assert chat["title"] == "Untitled chat (2)"
+
+    def test_numbering_skips_to_the_next_free_slot(self, monkeypatch):
+        fake_db = FakeFirestore(
+            seed={
+                "chats": {
+                    "c1": {"owner_uid": "uid-1", "title": "Untitled chat", "updated_at": 1},
+                    "c2": {"owner_uid": "uid-1", "title": "Untitled chat (2)", "updated_at": 2},
+                }
+            }
+        )
+        _wire(monkeypatch, fake_db)
+
+        chat = chats_mod.create_chat("uid-1")
+
+        assert chat["title"] == "Untitled chat (3)"
+
+    def test_numbering_only_considers_the_owners_own_chats(self, monkeypatch):
+        fake_db = FakeFirestore(
+            seed={
+                "chats": {
+                    "c1": {"owner_uid": "someone-else", "title": "Untitled chat", "updated_at": 1}
+                }
+            }
+        )
+        _wire(monkeypatch, fake_db)
+
+        chat = chats_mod.create_chat("uid-1")
+
+        assert chat["title"] == "Untitled chat"
+
+    def test_renamed_chats_dont_block_reuse_of_the_default_title(self, monkeypatch):
+        fake_db = FakeFirestore(
+            seed={
+                "chats": {"c1": {"owner_uid": "uid-1", "title": "IFRS 16 notes", "updated_at": 1}}
+            }
+        )
+        _wire(monkeypatch, fake_db)
+
+        chat = chats_mod.create_chat("uid-1")
+
+        assert chat["title"] == "Untitled chat"
 
 
 class TestListChats:
