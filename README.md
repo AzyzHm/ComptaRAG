@@ -39,7 +39,7 @@ ComptaRAG is an agentic RAG assistant for accounting and financial-law questions
 
 The project has two parts:
 
-- **Angular frontend** (`frontend/`): a public landing page, sign-in/sign-up, the chat interface, and an admin page for managing user roles.
+- **Angular frontend** (`frontend/`): a public landing page, sign-in/sign-up, the chat interface (with a chat history sidebar, at `/chat` and `/chat/:chatId`), and an admin page for managing user roles. The UI supports light, dark, and system themes, and the layout is responsive down to mobile, with the chat sidebar becoming an off-canvas drawer on narrow screens. See the [frontend README](frontend/README.md) for details on the theming and responsive-layout conventions.
 - **FastAPI backend** (`backend/`): a LangGraph agent that routes each question, retrieves relevant context from a ChromaDB vector store (embedded locally via Ollama), falls back to a Tavily web search when local context is not enough, and generates the final answer with Gemini.
 
 Authentication is handled by Firebase: the frontend signs users in with the Firebase JS SDK (email and password, or Google), and the backend verifies the resulting ID token with the Firebase Admin SDK on every request. User profiles and roles live in a Firestore `users` collection. See [section 4.3](#43-firebase-setup) for setup, and [section 5](#5-authentication-and-roles) for how roles work.
@@ -117,7 +117,7 @@ Authentication runs on Firebase, both the backend and the frontend need to point
 
 1. Create a project at [console.firebase.google.com](https://console.firebase.google.com), if you do not already have one.
 2. Under **Build > Authentication > Sign-in method**, enable the **Email/Password** and **Google** providers.
-3. Under **Build > Firestore Database**, create a database. The app manages the `users`, `chats`, `login_events`, and `usage_totals` collections itself, no manual setup is needed there, but you should still set security rules that block direct client reads and writes to all of them, since all access goes through the backend.
+3. Under **Build > Firestore Database**, create a database. The app manages the `users`, `chats`, `login_events`, and `usage_totals` collections itself, no manual setup is needed there, but you should still set security rules that block direct client reads and writes to all of them, since all access goes through the backend. Then deploy the composite index the chat list needs, `firebase deploy --only firestore:indexes` from the repo root (needs the [Firebase CLI](https://firebase.google.com/docs/cli), logged into this project), see [section 6](#6-data-model-and-stats) for why it is needed.
 4. Under **Project settings > Service accounts**, generate a new private key. This downloads a JSON file, save it somewhere on disk and point `FIREBASE_SERVICE_ACCOUNT_PATH` at it in the backend's `.env`. Set `FIREBASE_PROJECT_ID` to the project ID shown at the top of that same page. This file is a credential, keep it out of version control.
 5. Under **Project settings > General > Your apps**, add a web app if you do not have one, and copy its config object into `frontend/src/environments/environment.ts` and `environment.prod.ts`. This config is public client identification, not a secret, it is safe to commit once filled in.
 6. The very first account anyone creates, through either sign-in method, automatically becomes `SUPER_ADMIN`. Every account after that starts as `USER`. Sign up first to claim that role, then use the admin page at `/admin/users` to promote others.
@@ -143,9 +143,11 @@ Everything lives in Firestore, alongside the `users` collection described above:
 - `login_events/{eventId}`: `uid`, `email`, `ip`, `user_agent`, `created_at`, one entry per call to `GET /auth/me`, which the frontend calls right after every sign-in. Each user's profile also gets a `last_login_at` / `last_login_ip` stamp for a quick per-user summary without scanning events.
 - `usage_totals/{uid}`: `prompt_tokens`, `completion_tokens`, `total_tokens`, `message_count`, a running total updated after every assistant reply, so reading usage stats does not require summing every message ever sent.
 
+The frontend's chat page (`/chat`, `/chat/:chatId`) is a two-pane layout backed directly by this data: a history sidebar backed by `GET /chats/`, and a conversation pane backed by `GET /chats/{id}` and `POST /chats/{id}/messages`. Starting a message with no chat selected creates one first, chats can be renamed or deleted from the sidebar, and the sidebar itself collapses to a thin icon rail on desktop or an off-canvas drawer on mobile.
+
 `GET /admin/stats/logins` and `GET /admin/stats/usage` (both `ADMIN`/`SUPER_ADMIN` only) expose this data for an admin dashboard.
 
-Listing a user's chats filters on `owner_uid` and orders by `updated_at`, Firestore needs a composite index for that combination. The Firebase console will show a direct "create this index" link the first time that query runs against a real database if one is missing.
+Listing a user's chats filters on `owner_uid` and orders by `updated_at`, Firestore needs a composite index for that combination. It is declared in `firestore.indexes.json` at the repo root, deploy it once per project with `firebase deploy --only firestore:indexes` (needs the [Firebase CLI](https://firebase.google.com/docs/cli), logged into the same project). Skipping this makes `GET /chats/` fail with a `FAILED_PRECONDITION` error the first time it runs, the error itself includes a direct "create this index" link as a fallback.
 
 ## 7. Testing
 
