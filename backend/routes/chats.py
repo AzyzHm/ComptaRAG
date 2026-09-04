@@ -10,7 +10,6 @@ from core.chats import (
     get_messages,
     list_chats,
     rename_chat,
-    title_from_query,
     touch_chat,
 )
 from core.security import get_current_user
@@ -80,10 +79,11 @@ async def send_message(
 
     Runs the agent with the chat's last MAX_HISTORY_MESSAGES messages as
     conversational context, stores both the user's message and the
-    assistant's reply, rolls the reply's token cost into the caller's usage
-    total, and (on the very first exchange) titles the chat from the query.
+    assistant's reply, and rolls the reply's token cost into the caller's
+    usage total. The chat's title is left untouched, it stays "Untitled
+    chat" (or whatever the owner renamed it to) until they rename it.
     """
-    chat = _owned_chat_or_404(chat_id, current_user["uid"])
+    _owned_chat_or_404(chat_id, current_user["uid"])
 
     history = [
         {"role": message["role"], "content": message["content"]}
@@ -105,8 +105,7 @@ async def send_message(
         chat_id, role="assistant", content=answer, category=category, token_usage=token_usage
     )
 
-    is_first_exchange = chat.get("title") in (None, "New chat")
-    touch_chat(chat_id, title=title_from_query(body.query) if is_first_exchange else None)
+    touch_chat(chat_id)
 
     if token_usage:
         record_usage(current_user["uid"], token_usage)
