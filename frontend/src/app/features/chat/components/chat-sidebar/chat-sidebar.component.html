@@ -68,6 +68,7 @@
                 [ngModel]="draftTitle()"
                 (ngModelChange)="draftTitle.set($event)"
                 (click)="$event.stopPropagation()"
+                (keydown)="$event.stopPropagation()"
                 (keydown.enter)="confirmRename(chat.id)"
                 (keydown.escape)="cancelRename()"
                 (blur)="confirmRename(chat.id)"

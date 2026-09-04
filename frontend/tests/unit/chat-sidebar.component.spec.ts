@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/angular';
+import { render, screen, within } from '@testing-library/angular';
 import userEvent from '@testing-library/user-event';
 
 import { ChatSidebarComponent } from '@features/chat/components/chat-sidebar/chat-sidebar.component';
@@ -185,5 +185,29 @@ describe('ChatSidebarComponent', () => {
 
     expect(screen.getByText('IFRS 16 questions')).toBeTruthy();
     expect(screen.getByText('New chat')).toBeTruthy();
+  });
+
+  it('lets the rename input accept spaces without triggering row navigation', async () => {
+    const onSelectChat = jest.fn();
+    const onRenameChat = jest.fn();
+
+    await render(
+      `<app-chat-sidebar [chats]="chats" (selectChat)="onSelectChat($event)" (renameChat)="onRenameChat($event)" />`,
+      {
+        imports: [ChatSidebarComponent],
+        componentProperties: { chats, onSelectChat, onRenameChat }
+      }
+    );
+
+    const user = userEvent.setup();
+    const row = screen.getByText('IFRS 16 questions').closest('[role="button"]') as HTMLElement;
+    await user.click(within(row).getByRole('button', { name: /rename chat/i }));
+
+    const input = screen.getByRole('textbox') as HTMLInputElement;
+    await user.clear(input);
+    await user.type(input, 'Two words{Enter}');
+
+    expect(onSelectChat).not.toHaveBeenCalled();
+    expect(onRenameChat).toHaveBeenCalledWith({ id: 'c1', title: 'Two words' });
   });
 });
