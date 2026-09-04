@@ -26,13 +26,17 @@
   align-items: flex-end;
   gap: $spacing-sm;
   padding: $spacing-xs;
-  width: 100%;
+  width: 80%;
   max-width: 760px;
   margin: 0 auto;
   background-color: $color-paper;
   border: 1px solid $color-rule;
   border-radius: $radius-xl;
   transition: box-shadow 0.2s $ease-out;
+
+  @media (max-width: $breakpoint-sm) {
+    width: 100%;
+  }
 
   &:focus-within {
     box-shadow: 0 0 0 3px tint($color-ledger-teal, 15%);
