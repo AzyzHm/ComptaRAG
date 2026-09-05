@@ -1,6 +1,14 @@
 @use '../../../styles/variables' as *;
 @use '../../../styles/mixins' as *;
 
+:host {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
 .chat-shell {
   display: flex;
   width: 100%;
