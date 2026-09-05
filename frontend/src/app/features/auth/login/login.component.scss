@@ -1,6 +1,11 @@
 @use '../../../../styles/variables' as *;
 @use '../../../../styles/mixins' as *;
 
+:host {
+  display: flex;
+  width: 100%;
+}
+
 .auth {
   @include flex-center;
   flex: 1;
@@ -11,36 +16,28 @@
   }
 }
 
-.auth__card {
+.auth__panel {
   display: flex;
   flex-direction: column;
-  gap: $spacing-sm;
+  gap: $spacing-md;
   width: 100%;
   max-width: 460px;
-  padding: $spacing-xl $spacing-xl;
-  background-color: $color-paper-raised;
-  border: 1px solid $color-rule;
-  border-radius: $radius-xl;
-  box-shadow: $shadow-floating;
+  min-width: 0;
 
-  animation: auth-card-in 0.4s $ease-spring both;
-
-  @media (max-width: $breakpoint-sm) {
-    padding: $spacing-lg $spacing-md;
-  }
+  animation: auth-panel-in 0.3s $ease-spring both;
 }
 
 .auth__title {
-  font-size: 1.5rem;
+  font-size: 1.875rem;
   letter-spacing: -0.01em;
   text-align: center;
 }
 
 .auth__subtitle {
-  margin: 0 0 $spacing-sm;
+  margin: 0 0 $spacing-md;
   text-align: center;
   color: $color-ink-muted;
-  font-size: 0.8125rem;
+  font-size: 0.9375rem;
 }
 
 .auth__error {
@@ -67,18 +64,18 @@
 }
 
 .auth__label {
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   color: $color-ink-muted;
 }
 
 .auth__input {
   width: 100%;
-  padding: $spacing-sm $spacing-md;
+  padding: $spacing-md;
   border-radius: $radius-md;
   border: 1px solid $color-rule;
   background-color: $color-paper;
   color: $color-ink;
-  font-size: 0.9375rem;
+  font-size: 1rem;
   transition:
     border-color 0.2s $ease-out,
     box-shadow 0.2s $ease-out;
@@ -89,11 +86,7 @@
   }
 
   &--with-action {
-    padding-right: 44px;
-  }
-
-  @media (max-width: $breakpoint-sm) {
-    font-size: 1rem;
+    padding-right: 48px;
   }
 }
 
@@ -105,12 +98,12 @@
 
 .auth__reveal {
   position: absolute;
-  right: 4px;
+  right: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   padding: 0;
   border: none;
   border-radius: $radius-sm;
@@ -123,8 +116,8 @@
   @include focus-ring;
 
   svg {
-    width: 19px;
-    height: 19px;
+    width: 21px;
+    height: 21px;
   }
 
   &:hover:not(:disabled) {
@@ -142,7 +135,7 @@
 }
 
 .auth__form app-button,
-.auth__card > app-button {
+.auth__panel > app-button {
   margin-top: $spacing-xs;
 }
 
@@ -180,14 +173,14 @@
   }
 }
 
-@keyframes auth-card-in {
+@keyframes auth-panel-in {
   from {
     opacity: 0;
-    transform: translateY(8px) scale(0.98);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 
@@ -203,7 +196,7 @@
 }
 
 @include reduced-motion {
-  .auth__card,
+  .auth__panel,
   .auth__error {
     animation: none;
   }
