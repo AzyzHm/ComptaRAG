@@ -3,13 +3,10 @@
 
 .composer {
   padding: $spacing-md $spacing-lg;
-  background-color: $glass-paper;
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-top: 1px solid $glass-border;
+  border-top: 1px solid $color-rule;
 
   @media (max-width: $breakpoint-sm) {
-    padding: $spacing-sm $spacing-md;
+    padding: $spacing-md;
   }
 }
 
@@ -36,6 +33,7 @@
 
   @media (max-width: $breakpoint-sm) {
     width: 100%;
+    padding: $spacing-sm;
   }
 
   &:focus-within {
@@ -65,7 +63,9 @@
   }
 
   @media (max-width: $breakpoint-sm) {
+    padding: $spacing-md $spacing-sm $spacing-md $spacing-md;
     font-size: 1rem;
+    max-height: 160px;
   }
 }
 
@@ -102,6 +102,16 @@
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    width: 44px;
+    height: 44px;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
   }
 }
 
