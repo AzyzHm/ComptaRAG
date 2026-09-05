@@ -6,3 +6,8 @@ export interface UserProfile {
   display_name: string | null;
   role: Role;
 }
+
+export interface UpdateProfileRequest {
+  display_name?: string;
+  email?: string;
+}

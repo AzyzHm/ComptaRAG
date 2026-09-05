@@ -3,12 +3,11 @@
 
 .composer {
   padding: $spacing-md $spacing-lg;
-  // Translucent material floating over the message list, per Apple's
-  // toolbar treatment: content scrolls underneath, chrome stays glassy.
-  background-color: $glass-paper;
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-top: 1px solid $glass-border;
+  border-top: 1px solid $color-rule;
+
+  @media (max-width: $breakpoint-sm) {
+    padding: $spacing-md;
+  }
 }
 
 .composer__label {
@@ -24,13 +23,21 @@
   align-items: flex-end;
   gap: $spacing-sm;
   padding: $spacing-xs;
+  width: 80%;
+  max-width: 760px;
+  margin: 0 auto;
   background-color: $color-paper;
   border: 1px solid $color-rule;
   border-radius: $radius-xl;
   transition: box-shadow 0.2s $ease-out;
 
+  @media (max-width: $breakpoint-sm) {
+    width: 100%;
+    padding: $spacing-sm;
+  }
+
   &:focus-within {
-    box-shadow: 0 0 0 3px rgba($color-ledger-teal, 0.15);
+    box-shadow: 0 0 0 3px tint($color-ledger-teal, 15%);
     border-color: $color-ledger-teal;
   }
 }
@@ -53,6 +60,12 @@
 
   &::placeholder {
     color: $color-ink-muted;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    padding: $spacing-md $spacing-sm $spacing-md $spacing-md;
+    font-size: 1rem;
+    max-height: 160px;
   }
 }
 
@@ -89,6 +102,16 @@
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    width: 44px;
+    height: 44px;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
   }
 }
 

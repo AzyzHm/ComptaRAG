@@ -1,13 +1,13 @@
-$color-paper: #eef0e9;
-$color-paper-raised: #f7f8f3;
-$color-ink: #1c2b22;
-$color-ink-muted: #5b6b60;
-$color-rule: #c7c2aa;
-$color-ledger-teal: #1f6f5c; // IFRS accent
-$color-ledger-teal-dark: #175445;
-$color-fiscal-ochre: #c1841f; // Tunisian fiscal law accent
-$color-fiscal-ochre-dark: #9c6a17;
-$color-danger: #a6432f;
+$color-paper: var(--color-paper);
+$color-paper-raised: var(--color-paper-raised);
+$color-ink: var(--color-ink);
+$color-ink-muted: var(--color-ink-muted);
+$color-rule: var(--color-rule);
+$color-ledger-teal: var(--color-ledger-teal); // IFRS accent
+$color-ledger-teal-dark: var(--color-ledger-teal-dark);
+$color-fiscal-ochre: var(--color-fiscal-ochre); // Tunisian fiscal law accent
+$color-fiscal-ochre-dark: var(--color-fiscal-ochre-dark);
+$color-danger: var(--color-danger);
 
 $color-primary: $color-ledger-teal;
 $color-primary-dark: $color-ledger-teal-dark;
@@ -47,12 +47,8 @@ $ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
 $ease-spring-snappy: cubic-bezier(0.16, 1, 0.3, 1);
 $ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
-$shadow-raised:
-  0 1px 2px rgba(28, 43, 34, 0.04),
-  0 8px 24px -8px rgba(28, 43, 34, 0.14);
-$shadow-floating:
-  0 4px 12px rgba(28, 43, 34, 0.06),
-  0 16px 40px -12px rgba(28, 43, 34, 0.2);
+$shadow-raised: var(--shadow-raised);
+$shadow-floating: var(--shadow-floating);
 
-$glass-paper: rgba(247, 248, 243, 0.72);
-$glass-border: rgba(255, 255, 255, 0.5);
+$glass-paper: var(--glass-paper);
+$glass-border: var(--glass-border);

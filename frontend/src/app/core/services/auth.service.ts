@@ -3,14 +3,19 @@ import { firstValueFrom } from 'rxjs';
 import { FirebaseApp, initializeApp } from 'firebase/app';
 import {
   Auth,
+  EmailAuthProvider,
   GoogleAuthProvider,
   User as FirebaseUser,
   createUserWithEmailAndPassword,
   getAuth,
   onAuthStateChanged,
+  reauthenticateWithCredential,
   signInWithEmailAndPassword,
   signInWithPopup,
-  signOut
+  signOut,
+  updateEmail as firebaseUpdateEmail,
+  updatePassword as firebaseUpdatePassword,
+  updateProfile as firebaseUpdateProfile
 } from 'firebase/auth';
 
 import { environment } from '@env/environment';
@@ -81,6 +86,43 @@ export class AuthService {
       return Promise.resolve(null);
     }
     return current.getIdToken();
+  }
+
+  async updateDisplayName(displayName: string): Promise<void> {
+    const current = this.requireCurrentUser();
+    await firebaseUpdateProfile(current, { displayName });
+    await firstValueFrom(this.api.patch<UserProfile>('/auth/me', { display_name: displayName }));
+    await this.syncProfile();
+  }
+
+  async updateEmail(newEmail: string, currentPassword: string): Promise<void> {
+    const current = this.requireCurrentUser();
+    await this.reauthenticate(current, currentPassword);
+    await firebaseUpdateEmail(current, newEmail);
+    await firstValueFrom(this.api.patch<UserProfile>('/auth/me', { email: newEmail }));
+    await this.syncProfile();
+  }
+
+  async updatePassword(newPassword: string, currentPassword: string): Promise<void> {
+    const current = this.requireCurrentUser();
+    await this.reauthenticate(current, currentPassword);
+    await firebaseUpdatePassword(current, newPassword);
+  }
+
+  private requireCurrentUser(): FirebaseUser {
+    const current = firebaseAuth.currentUser;
+    if (!current) {
+      throw new Error('No authenticated user');
+    }
+    return current;
+  }
+
+  private async reauthenticate(user: FirebaseUser, currentPassword: string): Promise<void> {
+    if (!user.email) {
+      throw new Error('Account has no email to re-authenticate with');
+    }
+    const credential = EmailAuthProvider.credential(user.email, currentPassword);
+    await reauthenticateWithCredential(user, credential);
   }
 
   private async syncProfile(): Promise<void> {

@@ -67,4 +67,25 @@ describe('MessageComposerComponent', () => {
     await user.type(textarea, '{Enter}');
     expect(onSubmitted).toHaveBeenCalledWith('line one\nline two');
   });
+
+  it('inserts a newline on Ctrl+Enter instead of submitting', async () => {
+    const onSubmitted = jest.fn();
+
+    await render(`<app-message-composer (submitted)="onSubmitted($event)" />`, {
+      imports: [MessageComposerComponent],
+      componentProperties: { onSubmitted }
+    });
+
+    const textarea = screen.getByLabelText('Ask a question');
+    const event = new KeyboardEvent('keydown', {
+      key: 'Enter',
+      ctrlKey: true,
+      bubbles: true,
+      cancelable: true
+    });
+    textarea.dispatchEvent(event);
+
+    expect(event.defaultPrevented).toBe(false);
+    expect(onSubmitted).not.toHaveBeenCalled();
+  });
 });

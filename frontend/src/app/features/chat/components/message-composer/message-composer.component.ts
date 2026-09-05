@@ -33,7 +33,7 @@ export class MessageComposerComponent {
 
   protected onEnter(event: Event): void {
     const keyboardEvent = event as KeyboardEvent;
-    if (keyboardEvent.shiftKey) {
+    if (keyboardEvent.shiftKey || keyboardEvent.ctrlKey) {
       return;
     }
     keyboardEvent.preventDefault();

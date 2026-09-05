@@ -1,0 +1,120 @@
+@if (mobileOpen) {
+  <button
+    type="button"
+    class="sidebar__backdrop"
+    aria-label="Close chat list"
+    (click)="closeMobile.emit()"
+  ></button>
+}
+
+<aside
+  class="sidebar"
+  [class.sidebar--collapsed]="collapsed"
+  [class.sidebar--mobile-open]="mobileOpen"
+>
+  <div class="sidebar__top">
+    <button
+      type="button"
+      class="sidebar__collapse"
+      [attr.aria-label]="
+        mobileOpen ? 'Close sidebar' : collapsed ? 'Expand sidebar' : 'Collapse sidebar'
+      "
+      (click)="onToggleCollapse()"
+    >
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="3" y="4" width="18" height="16" rx="3" stroke="currentColor" stroke-width="1.6" />
+        <path d="M9 4v16" stroke="currentColor" stroke-width="1.6" />
+      </svg>
+    </button>
+
+    <button type="button" class="sidebar__new-chat" (click)="newChat.emit()">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path
+          d="M12 5v14M5 12h14"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+        />
+      </svg>
+      @if (expanded) {
+        <span>New chat</span>
+      }
+    </button>
+  </div>
+
+  @if (expanded) {
+    <nav class="sidebar__list" aria-label="Chat history">
+      @if (loading) {
+        <div class="sidebar__skeleton">
+          @for (i of [1, 2, 3, 4]; track i) {
+            <div class="sidebar__skeleton-row"></div>
+          }
+        </div>
+      } @else if (chats.length === 0) {
+        <p class="sidebar__empty">No chats yet, start one above.</p>
+      } @else {
+        @for (chat of chats; track chat.id) {
+          <div
+            class="sidebar__item"
+            role="button"
+            tabindex="0"
+            [class.sidebar__item--active]="chat.id === activeChatId"
+            (click)="onSelect(chat.id)"
+            (keydown.enter)="onSelect(chat.id)"
+            (keydown.space)="$event.preventDefault(); onSelect(chat.id)"
+          >
+            @if (editingChatId() === chat.id) {
+              <input
+                class="sidebar__rename-input"
+                type="text"
+                [ngModel]="draftTitle()"
+                (ngModelChange)="draftTitle.set($event)"
+                (click)="$event.stopPropagation()"
+                (keydown)="$event.stopPropagation()"
+                (keydown.enter)="confirmRename(chat.id)"
+                (keydown.escape)="cancelRename()"
+                (blur)="confirmRename(chat.id)"
+                appAutofocus
+              />
+            } @else {
+              <span class="sidebar__item-title">{{ chat.title }}</span>
+              <span class="sidebar__item-actions">
+                <button
+                  type="button"
+                  class="sidebar__item-action"
+                  aria-label="Rename chat"
+                  (click)="startRename(chat, $event)"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path
+                      d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3Z"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  class="sidebar__item-action sidebar__item-action--danger"
+                  aria-label="Delete chat"
+                  (click)="confirmDelete(chat.id, $event)"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path
+                      d="M5 7h14M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-9 0 1 13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l1-13"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </button>
+              </span>
+            }
+          </div>
+        }
+      }
+    </nav>
+  }
+</aside>

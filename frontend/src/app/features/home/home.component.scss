@@ -1,6 +1,11 @@
 @use '../../../styles/variables' as *;
 @use '../../../styles/mixins' as *;
 
+:host {
+  display: flex;
+  width: 100%;
+}
+
 .home {
   flex: 1;
   display: flex;
@@ -21,8 +26,6 @@
   text-align: center;
   max-width: 620px;
 
-  // Settle into place on load, like a card arriving rather than
-  // popping in, matching Apple's "materialize, don't just fade".
   animation: home-hero-in 0.5s $ease-spring both;
 }
 

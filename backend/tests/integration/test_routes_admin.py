@@ -9,17 +9,28 @@ from tests.setup.fakes import FakeFirestore
 def admin_client(monkeypatch):
     """
     Yields a factory `make_client(current_user, users)` returning a TestClient
-    with get_current_user overridden to `current_user` and routes.admin backed
-    by a fresh FakeFirestore seeded with `users`.
+    with get_current_user overridden to `current_user` and routes.admin (plus
+    core.stats, used by the stats endpoints) backed by a fresh FakeFirestore
+    seeded with `users`. `routes.admin.firebase_auth.delete_user` is replaced
+    with a no-op recorder, exposed as `make_client.deleted_auth_uids`, so
+    delete tests never make a real call to Firebase and can assert on what
+    would have been deleted.
     """
     import routes.admin as r_admin
+    from core import stats as core_stats
     from main import app as _app
+
+    deleted_auth_uids: list[str] = []
 
     def make_client(current_user, users):
         fake_db = FakeFirestore(users=users)
         monkeypatch.setattr(r_admin, "get_firestore_client", lambda: fake_db)
+        monkeypatch.setattr(core_stats, "get_firestore_client", lambda: fake_db)
+        monkeypatch.setattr(r_admin.firebase_auth, "delete_user", deleted_auth_uids.append)
         _app.dependency_overrides[get_current_user] = lambda: current_user
-        return TestClient(_app)
+        return TestClient(_app), fake_db
+
+    make_client.deleted_auth_uids = deleted_auth_uids
 
     yield make_client
 
@@ -27,19 +38,38 @@ def admin_client(monkeypatch):
 
 
 class TestListUsers:
-    def test_admin_can_list_users(self, admin_client):
-        client = admin_client(
+    def test_admin_only_sees_user_accounts(self, admin_client):
+        client, _fake_db = admin_client(
             current_user={"uid": "admin-1", "role": "ADMIN"},
-            users={"u1": {"email": "a@a.com", "role": "USER"}},
+            users={
+                "u1": {"email": "a@a.com", "role": "USER"},
+                "a1": {"email": "other-admin@a.com", "role": "ADMIN"},
+                "s1": {"email": "s@a.com", "role": "SUPER_ADMIN"},
+            },
         )
 
         response = client.get("/admin/users")
 
         assert response.status_code == 200
-        assert response.json() == [{"uid": "u1", "email": "a@a.com", "role": "USER"}]
+        assert [u["uid"] for u in response.json()] == ["u1"]
+
+    def test_super_admin_sees_users_and_admins_but_not_itself(self, admin_client):
+        client, _fake_db = admin_client(
+            current_user={"uid": "super-1", "role": "SUPER_ADMIN"},
+            users={
+                "u1": {"email": "a@a.com", "role": "USER"},
+                "a1": {"email": "admin@a.com", "role": "ADMIN"},
+                "super-1": {"email": "s@a.com", "role": "SUPER_ADMIN"},
+            },
+        )
+
+        response = client.get("/admin/users")
+
+        assert response.status_code == 200
+        assert {u["uid"] for u in response.json()} == {"u1", "a1"}
 
     def test_plain_user_cannot_list_users(self, admin_client):
-        client = admin_client(current_user={"uid": "u1", "role": "USER"}, users={})
+        client, _fake_db = admin_client(current_user={"uid": "u1", "role": "USER"}, users={})
 
         response = client.get("/admin/users")
 
@@ -48,7 +78,7 @@ class TestListUsers:
 
 class TestUpdateUserRole:
     def test_super_admin_can_grant_admin_role(self, admin_client):
-        client = admin_client(
+        client, _fake_db = admin_client(
             current_user={"uid": "super-1", "role": "SUPER_ADMIN"},
             users={"target": {"email": "t@t.com", "role": "USER"}},
         )
@@ -58,9 +88,20 @@ class TestUpdateUserRole:
         assert response.status_code == 200
         assert response.json()["role"] == "ADMIN"
 
-    def test_admin_cannot_grant_super_admin_role(self, admin_client):
-        client = admin_client(
-            current_user={"uid": "admin-1", "role": "ADMIN"},
+    def test_super_admin_can_demote_an_admin_back_to_user(self, admin_client):
+        client, _fake_db = admin_client(
+            current_user={"uid": "super-1", "role": "SUPER_ADMIN"},
+            users={"target": {"email": "t@t.com", "role": "ADMIN"}},
+        )
+
+        response = client.patch("/admin/users/target/role", json={"role": "USER"})
+
+        assert response.status_code == 200
+        assert response.json()["role"] == "USER"
+
+    def test_super_admin_cannot_grant_super_admin_role(self, admin_client):
+        client, _fake_db = admin_client(
+            current_user={"uid": "super-1", "role": "SUPER_ADMIN"},
             users={"target": {"email": "t@t.com", "role": "USER"}},
         )
 
@@ -68,29 +109,159 @@ class TestUpdateUserRole:
 
         assert response.status_code == 403
 
-    def test_admin_cannot_modify_a_super_admin_account(self, admin_client):
-        client = admin_client(
+    def test_admin_cannot_change_any_role(self, admin_client):
+        client, _fake_db = admin_client(
             current_user={"uid": "admin-1", "role": "ADMIN"},
-            users={"target": {"email": "t@t.com", "role": "SUPER_ADMIN"}},
+            users={"target": {"email": "t@t.com", "role": "USER"}},
         )
 
-        response = client.patch("/admin/users/target/role", json={"role": "USER"})
+        response = client.patch("/admin/users/target/role", json={"role": "ADMIN"})
 
         assert response.status_code == 403
 
     def test_cannot_change_own_role(self, admin_client):
-        client = admin_client(
-            current_user={"uid": "admin-1", "role": "ADMIN"},
-            users={"admin-1": {"email": "a@a.com", "role": "ADMIN"}},
+        client, _fake_db = admin_client(
+            current_user={"uid": "super-1", "role": "SUPER_ADMIN"},
+            users={"super-1": {"email": "a@a.com", "role": "SUPER_ADMIN"}},
         )
 
-        response = client.patch("/admin/users/admin-1/role", json={"role": "USER"})
+        response = client.patch("/admin/users/super-1/role", json={"role": "USER"})
 
         assert response.status_code == 400
 
     def test_returns_404_for_unknown_user(self, admin_client):
-        client = admin_client(current_user={"uid": "super-1", "role": "SUPER_ADMIN"}, users={})
+        client, _fake_db = admin_client(
+            current_user={"uid": "super-1", "role": "SUPER_ADMIN"}, users={}
+        )
 
         response = client.patch("/admin/users/ghost/role", json={"role": "USER"})
 
         assert response.status_code == 404
+
+
+class TestDeleteUser:
+    def test_super_admin_can_delete_a_user(self, admin_client):
+        client, fake_db = admin_client(
+            current_user={"uid": "super-1", "role": "SUPER_ADMIN"},
+            users={"target": {"email": "t@t.com", "role": "USER"}},
+        )
+
+        response = client.delete("/admin/users/target")
+
+        assert response.status_code == 204
+        assert fake_db.collection("users").document("target").get().exists is False
+        assert admin_client.deleted_auth_uids == ["target"]
+
+    def test_admin_can_delete_a_user(self, admin_client):
+        client, fake_db = admin_client(
+            current_user={"uid": "admin-1", "role": "ADMIN"},
+            users={"target": {"email": "t@t.com", "role": "USER"}},
+        )
+
+        response = client.delete("/admin/users/target")
+
+        assert response.status_code == 204
+        assert fake_db.collection("users").document("target").get().exists is False
+        assert admin_client.deleted_auth_uids == ["target"]
+
+    def test_admin_cannot_delete_another_admin(self, admin_client):
+        client, _fake_db = admin_client(
+            current_user={"uid": "admin-1", "role": "ADMIN"},
+            users={"target": {"email": "t@t.com", "role": "ADMIN"}},
+        )
+
+        response = client.delete("/admin/users/target")
+
+        assert response.status_code == 403
+
+    def test_admin_cannot_delete_super_admin(self, admin_client):
+        client, _fake_db = admin_client(
+            current_user={"uid": "admin-1", "role": "ADMIN"},
+            users={"super-1": {"email": "s@a.com", "role": "SUPER_ADMIN"}},
+        )
+
+        response = client.delete("/admin/users/super-1")
+
+        assert response.status_code == 403
+
+    def test_super_admin_can_delete_an_admin(self, admin_client):
+        client, fake_db = admin_client(
+            current_user={"uid": "super-1", "role": "SUPER_ADMIN"},
+            users={"target": {"email": "t@t.com", "role": "ADMIN"}},
+        )
+
+        response = client.delete("/admin/users/target")
+
+        assert response.status_code == 204
+        assert fake_db.collection("users").document("target").get().exists is False
+
+    def test_cannot_delete_own_account(self, admin_client):
+        client, _fake_db = admin_client(
+            current_user={"uid": "super-1", "role": "SUPER_ADMIN"},
+            users={"super-1": {"email": "s@a.com", "role": "SUPER_ADMIN"}},
+        )
+
+        response = client.delete("/admin/users/super-1")
+
+        assert response.status_code == 400
+
+    def test_returns_404_for_unknown_user(self, admin_client):
+        client, _fake_db = admin_client(
+            current_user={"uid": "super-1", "role": "SUPER_ADMIN"}, users={}
+        )
+
+        response = client.delete("/admin/users/ghost")
+
+        assert response.status_code == 404
+
+
+class TestLoginStats:
+    def test_admin_can_list_recent_logins_newest_first(self, admin_client):
+        client, fake_db = admin_client(current_user={"uid": "admin-1", "role": "ADMIN"}, users={})
+        fake_db.collection("login_events").document("e1").set(
+            {"uid": "u1", "email": "a@a.com", "ip": "1.1.1.1", "created_at": 1}
+        )
+        fake_db.collection("login_events").document("e2").set(
+            {"uid": "u2", "email": "b@b.com", "ip": "2.2.2.2", "created_at": 2}
+        )
+
+        response = client.get("/admin/stats/logins")
+
+        assert response.status_code == 200
+        emails = [event["email"] for event in response.json()]
+        assert emails == ["b@b.com", "a@a.com"]
+
+    def test_plain_user_cannot_view_login_stats(self, admin_client):
+        client, _fake_db = admin_client(current_user={"uid": "u1", "role": "USER"}, users={})
+
+        response = client.get("/admin/stats/logins")
+
+        assert response.status_code == 403
+
+
+class TestUsageStats:
+    def test_admin_can_list_usage_totals(self, admin_client):
+        client, fake_db = admin_client(current_user={"uid": "admin-1", "role": "ADMIN"}, users={})
+        fake_db.collection("usage_totals").document("u1").set(
+            {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15, "message_count": 1}
+        )
+
+        response = client.get("/admin/stats/usage")
+
+        assert response.status_code == 200
+        assert response.json() == [
+            {
+                "uid": "u1",
+                "prompt_tokens": 10,
+                "completion_tokens": 5,
+                "total_tokens": 15,
+                "message_count": 1,
+            }
+        ]
+
+    def test_plain_user_cannot_view_usage_stats(self, admin_client):
+        client, _fake_db = admin_client(current_user={"uid": "u1", "role": "USER"}, users={})
+
+        response = client.get("/admin/stats/usage")
+
+        assert response.status_code == 403

@@ -1,0 +1,31 @@
+<!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
+<div class="modal-backdrop" (click)="close()">
+  <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events -->
+  <div
+    class="modal-panel"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="title || null"
+    (click)="stopPropagation($event)"
+  >
+    <div class="modal-panel__header">
+      @if (title) {
+        <h2 class="modal-panel__title">{{ title }}</h2>
+      }
+      <button type="button" class="modal-panel__close" aria-label="Close" (click)="close()">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path
+            d="M6 6l12 12M18 6L6 18"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+          />
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-panel__body">
+      <ng-content />
+    </div>
+  </div>
+</div>

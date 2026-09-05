@@ -12,4 +12,13 @@
   justify-content: center;
   min-height: 0;
   padding: 0 $spacing-lg;
+
+  @media (max-width: $breakpoint-sm) {
+    padding: 0 $spacing-md;
+  }
+
+  &--full {
+    padding: 0;
+    justify-content: stretch;
+  }
 }

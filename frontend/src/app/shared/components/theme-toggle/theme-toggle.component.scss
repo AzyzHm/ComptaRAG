@@ -1,0 +1,49 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: $radius-pill;
+  background-color: tint($color-ink, 5%);
+
+  &__option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    border-radius: $radius-pill;
+    background: transparent;
+    color: $color-ink-muted;
+    cursor: pointer;
+    transition:
+      background-color 0.18s $ease-out,
+      color 0.18s $ease-out,
+      transform 0.15s $ease-spring-snappy;
+    @include focus-ring;
+
+    svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    &:hover:not(&--active) {
+      color: $color-ink;
+    }
+
+    &:active {
+      transform: scale(0.9);
+    }
+
+    &--active {
+      background-color: $color-paper-raised;
+      color: $color-ledger-teal;
+      box-shadow: $shadow-raised;
+    }
+  }
+}

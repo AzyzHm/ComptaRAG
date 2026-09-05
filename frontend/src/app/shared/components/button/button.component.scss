@@ -27,7 +27,6 @@
     background-color: $color-primary-dark;
   }
 
-  // Feedback lands the instant the pointer goes down, not on release.
   &:active:not(:disabled) {
     transform: scale(0.97);
   }
@@ -43,7 +42,7 @@
     border: 1px solid $color-border;
 
     &:hover:not(:disabled) {
-      background-color: rgba($color-primary, 0.06);
+      background-color: tint($color-primary, 6%);
     }
   }
 

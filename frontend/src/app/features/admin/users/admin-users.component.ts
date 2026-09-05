@@ -13,7 +13,7 @@ import { AuthService } from '@core/services/auth.service';
 import { Role, UserProfile } from '@core/models/user.model';
 import { RoleBadgeComponent } from '@shared/components/role-badge/role-badge.component';
 
-const ALL_ROLES: Role[] = ['USER', 'ADMIN', 'SUPER_ADMIN'];
+const ASSIGNABLE_ROLES: Role[] = ['USER', 'ADMIN'];
 
 @Component({
   selector: 'app-admin-users',
@@ -34,6 +34,7 @@ export class AdminUsersComponent implements OnInit {
 
   protected readonly viewerUid = computed(() => this.authService.profile()?.uid ?? null);
   protected readonly viewerIsSuperAdmin = computed(() => this.authService.role() === 'SUPER_ADMIN');
+  protected readonly assignableRoles = ASSIGNABLE_ROLES;
 
   ngOnInit(): void {
     this.load();
@@ -56,20 +57,11 @@ export class AdminUsersComponent implements OnInit {
   }
 
   protected canEditRole(user: UserProfile): boolean {
-    if (user.uid === this.viewerUid()) {
-      return false;
-    }
-    if (!this.viewerIsSuperAdmin() && user.role === 'SUPER_ADMIN') {
-      return false;
-    }
-    return true;
+    return this.viewerIsSuperAdmin() && user.uid !== this.viewerUid();
   }
 
-  protected availableRolesFor(_user: UserProfile): Role[] {
-    if (this.viewerIsSuperAdmin()) {
-      return ALL_ROLES;
-    }
-    return ALL_ROLES.filter((role) => role !== 'SUPER_ADMIN');
+  protected canDelete(user: UserProfile): boolean {
+    return this.viewerIsSuperAdmin() && user.uid !== this.viewerUid();
   }
 
   protected changeRole(user: UserProfile, role: Role): void {
@@ -89,6 +81,29 @@ export class AdminUsersComponent implements OnInit {
       },
       error: () => {
         this.error.set(`Could not update the role for ${user.email ?? user.uid}.`);
+        this.pendingUid.set(null);
+      }
+    });
+  }
+
+  protected deleteUser(user: UserProfile): void {
+    if (this.pendingUid()) {
+      return;
+    }
+    if (!window.confirm(`Delete ${user.email ?? user.uid}? This cannot be undone.`)) {
+      return;
+    }
+
+    this.pendingUid.set(user.uid);
+    this.error.set(null);
+
+    this.adminApi.deleteUser(user.uid).subscribe({
+      next: () => {
+        this.users.update((current) => current.filter((entry) => entry.uid !== user.uid));
+        this.pendingUid.set(null);
+      },
+      error: () => {
+        this.error.set(`Could not delete ${user.email ?? user.uid}.`);
         this.pendingUid.set(null);
       }
     });

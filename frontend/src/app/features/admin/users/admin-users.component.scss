@@ -1,11 +1,20 @@
 @use '../../../../styles/variables' as *;
 @use '../../../../styles/mixins' as *;
 
+:host {
+  display: block;
+  width: 100%;
+}
+
 .admin-users {
   width: 100%;
   max-width: 900px;
   margin: 0 auto;
   padding: $spacing-lg;
+
+  @media (max-width: $breakpoint-sm) {
+    padding: $spacing-md;
+  }
 }
 
 .admin-users__title {
@@ -31,13 +40,19 @@
   color: $color-ink-muted;
 }
 
-.admin-users__table {
+.admin-users__table-wrapper {
   width: 100%;
-  border-collapse: collapse;
-  background-color: $color-paper-raised;
+  overflow-x: auto;
   border: 1px solid $color-rule;
   border-radius: $radius-md;
-  overflow: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-users__table {
+  width: 100%;
+  min-width: 480px;
+  border-collapse: collapse;
+  background-color: $color-paper-raised;
 
   th,
   td {
@@ -45,6 +60,7 @@
     padding: $spacing-sm $spacing-md;
     border-bottom: 1px solid $color-rule;
     font-size: 0.875rem;
+    white-space: nowrap;
   }
 
   th {
@@ -75,4 +91,25 @@
 
 .admin-users__locked {
   color: $color-ink-muted;
+}
+
+.admin-users__delete {
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $radius-sm;
+  border: 1px solid $color-danger;
+  background-color: transparent;
+  color: $color-danger;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: background-color 0.15s $ease-out;
+  @include focus-ring;
+
+  &:hover:not(:disabled) {
+    background-color: tint($color-danger, 12%);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
 }

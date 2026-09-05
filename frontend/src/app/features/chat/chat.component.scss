@@ -1,17 +1,56 @@
 @use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as *;
 
-.chat {
+:host {
   display: flex;
-  flex-direction: column;
-  flex: 0 1 auto;
-  min-height: 0;
+  flex: 1;
   width: 100%;
-  max-width: 760px;
-  margin: 0 auto;
+  min-width: 0;
+  min-height: 0;
 }
 
-.chat__error {
-  margin: 0 $spacing-lg $spacing-sm;
+.chat-shell {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.chat-shell__conversation {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+}
+
+.chat-shell__mobile-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin: $spacing-sm $spacing-sm 0;
+  border: 1px solid $color-rule;
+  border-radius: $radius-sm;
+  background-color: $color-paper-raised;
+  color: $color-ink;
+  cursor: pointer;
+  @include focus-ring;
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  @media (max-width: $breakpoint-md) {
+    display: flex;
+  }
+}
+
+.chat-shell__error {
+  margin: $spacing-sm $spacing-lg 0;
   padding: $spacing-sm $spacing-md;
   border-radius: $radius-md;
   border: 1px solid $color-danger;
@@ -32,7 +71,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .chat__error {
+  .chat-shell__error {
     animation: none;
   }
 }
