@@ -40,7 +40,7 @@ ComptaRAG is an agentic RAG assistant for accounting and financial-law questions
 The project has two parts:
 
 - **Angular frontend** (`frontend/`): a public landing page, sign-in/sign-up, the chat interface (with a chat history sidebar, at `/chat` and `/chat/:chatId`), and an admin page for managing user roles. The UI supports light, dark, and system themes, and the layout is responsive down to mobile, with the chat sidebar becoming an off-canvas drawer on narrow screens. See the [frontend README](frontend/README.md) for details on the theming and responsive-layout conventions.
-- **FastAPI backend** (`backend/`): a LangGraph agent that routes each question, retrieves relevant context from a ChromaDB vector store (embedded locally via Ollama), falls back to a Tavily web search when local context is not enough, and generates the final answer with Gemini.
+- **FastAPI backend** (`backend/`): a LangGraph agent that routes each question, retrieves relevant context from a ChromaDB vector store (embedded locally via Ollama), falls back to a Tavily web search when local context is not enough, and generates the final answer with Gemini. See the [backend README](backend/README.md) for the pipeline's node-by-node breakdown and project structure.
 
 Authentication is handled by Firebase: the frontend signs users in with the Firebase JS SDK (email and password, or Google), and the backend verifies the resulting ID token with the Firebase Admin SDK on every request. User profiles and roles live in a Firestore `users` collection. See [section 4.3](#43-firebase-setup) for setup, and [section 5](#5-authentication-and-roles) for how roles work.
 
