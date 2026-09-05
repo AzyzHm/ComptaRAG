@@ -75,13 +75,25 @@
   &__right {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
     gap: $spacing-md;
+
+    @media (max-width: $breakpoint-sm) {
+      gap: $spacing-sm;
+    }
   }
 
   &__account {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
     gap: $spacing-md;
+
+    @media (max-width: $breakpoint-sm) {
+      gap: $spacing-sm;
+    }
   }
 
   &__user {
@@ -116,7 +128,8 @@
     white-space: nowrap;
 
     @media (max-width: $breakpoint-sm) {
-      display: none;
+      max-width: 96px;
+      font-size: 0.8125rem;
     }
   }
 }
