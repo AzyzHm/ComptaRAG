@@ -77,11 +77,12 @@ async def update_user_role(
 @router.delete("/users/{uid}", status_code=204)
 async def delete_user(
     uid: str,
-    current_user: dict = Depends(require_roles(Role.SUPER_ADMIN)),
+    current_user: dict = Depends(require_roles(Role.ADMIN, Role.SUPER_ADMIN)),
 ):
     """Deletes a user's account: the Firestore profile and the Firebase Auth
-    user. SUPER_ADMIN only. Chats already owned by the deleted account are
-    left in place, they become unreachable once the account is gone."""
+    user. ADMIN can only delete USER accounts. SUPER_ADMIN can delete USER
+    and ADMIN accounts. Chats already owned by the deleted account are left
+    in place, they become unreachable once the account is gone."""
     if uid == current_user["uid"]:
         raise HTTPException(status_code=400, detail="You cannot delete your own account")
 
@@ -91,8 +92,12 @@ async def delete_user(
     if not doc.exists:
         raise HTTPException(status_code=404, detail="User not found")
 
-    if doc.to_dict().get("role") == Role.SUPER_ADMIN.value:
+    target_role = doc.to_dict().get("role")
+    if target_role == Role.SUPER_ADMIN.value:
         raise HTTPException(status_code=403, detail="The SUPER_ADMIN account cannot be deleted")
+
+    if current_user["role"] == Role.ADMIN.value and target_role != Role.USER.value:
+        raise HTTPException(status_code=403, detail="ADMIN can only delete USER accounts")
 
     doc_ref.delete()
     with contextlib.suppress(firebase_auth.UserNotFoundError):

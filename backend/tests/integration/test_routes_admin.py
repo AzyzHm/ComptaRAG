@@ -152,15 +152,48 @@ class TestDeleteUser:
         assert fake_db.collection("users").document("target").get().exists is False
         assert admin_client.deleted_auth_uids == ["target"]
 
-    def test_admin_cannot_delete_a_user(self, admin_client):
-        client, _fake_db = admin_client(
+    def test_admin_can_delete_a_user(self, admin_client):
+        client, fake_db = admin_client(
             current_user={"uid": "admin-1", "role": "ADMIN"},
             users={"target": {"email": "t@t.com", "role": "USER"}},
         )
 
         response = client.delete("/admin/users/target")
 
+        assert response.status_code == 204
+        assert fake_db.collection("users").document("target").get().exists is False
+        assert admin_client.deleted_auth_uids == ["target"]
+
+    def test_admin_cannot_delete_another_admin(self, admin_client):
+        client, _fake_db = admin_client(
+            current_user={"uid": "admin-1", "role": "ADMIN"},
+            users={"target": {"email": "t@t.com", "role": "ADMIN"}},
+        )
+
+        response = client.delete("/admin/users/target")
+
         assert response.status_code == 403
+
+    def test_admin_cannot_delete_super_admin(self, admin_client):
+        client, _fake_db = admin_client(
+            current_user={"uid": "admin-1", "role": "ADMIN"},
+            users={"super-1": {"email": "s@a.com", "role": "SUPER_ADMIN"}},
+        )
+
+        response = client.delete("/admin/users/super-1")
+
+        assert response.status_code == 403
+
+    def test_super_admin_can_delete_an_admin(self, admin_client):
+        client, fake_db = admin_client(
+            current_user={"uid": "super-1", "role": "SUPER_ADMIN"},
+            users={"target": {"email": "t@t.com", "role": "ADMIN"}},
+        )
+
+        response = client.delete("/admin/users/target")
+
+        assert response.status_code == 204
+        assert fake_db.collection("users").document("target").get().exists is False
 
     def test_cannot_delete_own_account(self, admin_client):
         client, _fake_db = admin_client(
