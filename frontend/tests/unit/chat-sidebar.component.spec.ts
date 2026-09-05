@@ -126,6 +126,24 @@ describe('ChatSidebarComponent', () => {
     expect(onToggleCollapsed).toHaveBeenCalled();
   });
 
+  it('closes the mobile drawer, instead of emitting toggleCollapsed, when the same button is clicked while the drawer is open', async () => {
+    const onToggleCollapsed = jest.fn();
+    const onCloseMobile = jest.fn();
+
+    await render(
+      `<app-chat-sidebar [chats]="chats" [mobileOpen]="true" (toggleCollapsed)="onToggleCollapsed()" (closeMobile)="onCloseMobile()" />`,
+      {
+        imports: [ChatSidebarComponent],
+        componentProperties: { chats, onToggleCollapsed, onCloseMobile }
+      }
+    );
+
+    await userEvent.setup().click(screen.getByRole('button', { name: /close sidebar/i }));
+
+    expect(onCloseMobile).toHaveBeenCalled();
+    expect(onToggleCollapsed).not.toHaveBeenCalled();
+  });
+
   it('emits selectChat when a row is activated with the keyboard', async () => {
     const onSelectChat = jest.fn();
 

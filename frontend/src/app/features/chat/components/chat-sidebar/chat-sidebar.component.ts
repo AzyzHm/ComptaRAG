@@ -70,6 +70,14 @@ export class ChatSidebarComponent {
     return !this.collapsed || this.mobileOpen;
   }
 
+  protected onToggleCollapse(): void {
+    if (this.mobileOpen) {
+      this.closeMobile.emit();
+    } else {
+      this.toggleCollapsed.emit();
+    }
+  }
+
   @HostListener('document:keydown.escape')
   protected onEscape(): void {
     if (this.mobileOpen) {
