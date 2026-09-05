@@ -1,6 +1,11 @@
 @use '../../../../styles/variables' as *;
 @use '../../../../styles/mixins' as *;
 
+:host {
+  display: block;
+  width: 100%;
+}
+
 .admin-users {
   width: 100%;
   max-width: 900px;
