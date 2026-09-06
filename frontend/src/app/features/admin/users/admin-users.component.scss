@@ -40,6 +40,36 @@
   color: $color-ink-muted;
 }
 
+.admin-users__kpis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+}
+
+.admin-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: $spacing-sm $spacing-md;
+  border: 1px solid $color-rule;
+  border-radius: $radius-md;
+  background-color: $color-paper-raised;
+  min-width: 120px;
+}
+
+.admin-kpi__value {
+  font-family: $font-display;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: $color-ink;
+}
+
+.admin-kpi__label {
+  font-size: 0.75rem;
+  color: $color-ink-muted;
+}
+
 .admin-users__table-wrapper {
   width: 100%;
   overflow-x: auto;

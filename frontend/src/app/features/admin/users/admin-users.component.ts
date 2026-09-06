@@ -36,6 +36,13 @@ export class AdminUsersComponent implements OnInit {
   protected readonly viewerIsSuperAdmin = computed(() => this.authService.role() === 'SUPER_ADMIN');
   protected readonly assignableRoles = ASSIGNABLE_ROLES;
 
+  protected readonly totalUsers = computed(
+    () => this.users().filter((user) => user.role === 'USER').length
+  );
+  protected readonly totalAdmins = computed(
+    () => this.users().filter((user) => user.role === 'ADMIN').length
+  );
+
   ngOnInit(): void {
     this.load();
   }
@@ -61,7 +68,10 @@ export class AdminUsersComponent implements OnInit {
   }
 
   protected canDelete(user: UserProfile): boolean {
-    return this.viewerIsSuperAdmin() && user.uid !== this.viewerUid();
+    if (user.uid === this.viewerUid()) {
+      return false;
+    }
+    return this.viewerIsSuperAdmin() || user.role === 'USER';
   }
 
   protected changeRole(user: UserProfile, role: Role): void {
