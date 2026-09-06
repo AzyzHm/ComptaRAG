@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 
 import { ApiService } from '@core/services/api.service';
 import { Role, UserProfile } from '@core/models/user.model';
+import { LoginEvent, UsageTotal } from '@core/models/admin-stats.model';
 
 @Injectable({ providedIn: 'root' })
 export class AdminApiService {
@@ -18,5 +19,13 @@ export class AdminApiService {
 
   deleteUser(uid: string): Observable<void> {
     return this.api.delete<void>(`/admin/users/${uid}`);
+  }
+
+  listLoginEvents(): Observable<LoginEvent[]> {
+    return this.api.get<LoginEvent[]>('/admin/stats/logins');
+  }
+
+  listUsageTotals(): Observable<UsageTotal[]> {
+    return this.api.get<UsageTotal[]>('/admin/stats/usage');
   }
 }
