@@ -217,7 +217,13 @@ class TestDeleteUser:
 
 class TestLoginStats:
     def test_admin_can_list_recent_logins_newest_first(self, admin_client):
-        client, fake_db = admin_client(current_user={"uid": "admin-1", "role": "ADMIN"}, users={})
+        client, fake_db = admin_client(
+            current_user={"uid": "admin-1", "role": "ADMIN"},
+            users={
+                "u1": {"email": "a@a.com", "role": "USER"},
+                "u2": {"email": "b@b.com", "role": "USER"},
+            },
+        )
         fake_db.collection("login_events").document("e1").set(
             {"uid": "u1", "email": "a@a.com", "ip": "1.1.1.1", "created_at": 1}
         )
@@ -231,6 +237,60 @@ class TestLoginStats:
         emails = [event["email"] for event in response.json()]
         assert emails == ["b@b.com", "a@a.com"]
 
+    def test_admin_only_sees_user_logins_not_admin_logins(self, admin_client):
+        client, fake_db = admin_client(
+            current_user={"uid": "admin-1", "role": "ADMIN"},
+            users={
+                "u1": {"email": "a@a.com", "role": "USER"},
+                "a2": {"email": "other-admin@a.com", "role": "ADMIN"},
+            },
+        )
+        fake_db.collection("login_events").document("e1").set(
+            {"uid": "u1", "email": "a@a.com", "ip": "1.1.1.1", "created_at": 1}
+        )
+        fake_db.collection("login_events").document("e2").set(
+            {"uid": "a2", "email": "other-admin@a.com", "ip": "2.2.2.2", "created_at": 2}
+        )
+
+        response = client.get("/admin/stats/logins")
+
+        assert response.status_code == 200
+        assert [event["uid"] for event in response.json()] == ["u1"]
+
+    def test_super_admin_sees_user_and_admin_logins(self, admin_client):
+        client, fake_db = admin_client(
+            current_user={"uid": "super-1", "role": "SUPER_ADMIN"},
+            users={
+                "u1": {"email": "a@a.com", "role": "USER"},
+                "a1": {"email": "admin@a.com", "role": "ADMIN"},
+            },
+        )
+        fake_db.collection("login_events").document("e1").set(
+            {"uid": "u1", "email": "a@a.com", "ip": "1.1.1.1", "created_at": 1}
+        )
+        fake_db.collection("login_events").document("e2").set(
+            {"uid": "a1", "email": "admin@a.com", "ip": "2.2.2.2", "created_at": 2}
+        )
+
+        response = client.get("/admin/stats/logins")
+
+        assert response.status_code == 200
+        assert {event["uid"] for event in response.json()} == {"u1", "a1"}
+
+    def test_caller_never_sees_their_own_logins(self, admin_client):
+        client, fake_db = admin_client(
+            current_user={"uid": "admin-1", "role": "SUPER_ADMIN"},
+            users={"admin-1": {"email": "admin@a.com", "role": "SUPER_ADMIN"}},
+        )
+        fake_db.collection("login_events").document("e1").set(
+            {"uid": "admin-1", "email": "admin@a.com", "ip": "1.1.1.1", "created_at": 1}
+        )
+
+        response = client.get("/admin/stats/logins")
+
+        assert response.status_code == 200
+        assert response.json() == []
+
     def test_plain_user_cannot_view_login_stats(self, admin_client):
         client, _fake_db = admin_client(current_user={"uid": "u1", "role": "USER"}, users={})
 
@@ -241,7 +301,10 @@ class TestLoginStats:
 
 class TestUsageStats:
     def test_admin_can_list_usage_totals(self, admin_client):
-        client, fake_db = admin_client(current_user={"uid": "admin-1", "role": "ADMIN"}, users={})
+        client, fake_db = admin_client(
+            current_user={"uid": "admin-1", "role": "ADMIN"},
+            users={"u1": {"email": "a@a.com", "display_name": "Ali", "role": "USER"}},
+        )
         fake_db.collection("usage_totals").document("u1").set(
             {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15, "message_count": 1}
         )
@@ -252,12 +315,69 @@ class TestUsageStats:
         assert response.json() == [
             {
                 "uid": "u1",
+                "email": "a@a.com",
+                "display_name": "Ali",
+                "role": "USER",
                 "prompt_tokens": 10,
                 "completion_tokens": 5,
                 "total_tokens": 15,
                 "message_count": 1,
             }
         ]
+
+    def test_admin_only_sees_user_usage_not_admin_usage(self, admin_client):
+        client, fake_db = admin_client(
+            current_user={"uid": "admin-1", "role": "ADMIN"},
+            users={
+                "u1": {"email": "a@a.com", "role": "USER"},
+                "a2": {"email": "other-admin@a.com", "role": "ADMIN"},
+            },
+        )
+        fake_db.collection("usage_totals").document("u1").set(
+            {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15, "message_count": 1}
+        )
+        fake_db.collection("usage_totals").document("a2").set(
+            {"prompt_tokens": 99, "completion_tokens": 99, "total_tokens": 198, "message_count": 9}
+        )
+
+        response = client.get("/admin/stats/usage")
+
+        assert response.status_code == 200
+        assert [row["uid"] for row in response.json()] == ["u1"]
+
+    def test_super_admin_sees_user_and_admin_usage(self, admin_client):
+        client, fake_db = admin_client(
+            current_user={"uid": "super-1", "role": "SUPER_ADMIN"},
+            users={
+                "u1": {"email": "a@a.com", "role": "USER"},
+                "a1": {"email": "admin@a.com", "role": "ADMIN"},
+            },
+        )
+        fake_db.collection("usage_totals").document("u1").set(
+            {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15, "message_count": 1}
+        )
+        fake_db.collection("usage_totals").document("a1").set(
+            {"prompt_tokens": 99, "completion_tokens": 99, "total_tokens": 198, "message_count": 9}
+        )
+
+        response = client.get("/admin/stats/usage")
+
+        assert response.status_code == 200
+        assert {row["uid"] for row in response.json()} == {"u1", "a1"}
+
+    def test_caller_never_sees_their_own_usage(self, admin_client):
+        client, fake_db = admin_client(
+            current_user={"uid": "super-1", "role": "SUPER_ADMIN"},
+            users={"super-1": {"email": "s@a.com", "role": "SUPER_ADMIN"}},
+        )
+        fake_db.collection("usage_totals").document("super-1").set(
+            {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15, "message_count": 1}
+        )
+
+        response = client.get("/admin/stats/usage")
+
+        assert response.status_code == 200
+        assert response.json() == []
 
     def test_plain_user_cannot_view_usage_stats(self, admin_client):
         client, _fake_db = admin_client(current_user={"uid": "u1", "role": "USER"}, users={})

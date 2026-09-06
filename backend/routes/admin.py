@@ -108,15 +108,17 @@ async def delete_user(
 async def list_login_events(
     current_user: dict = Depends(require_roles(Role.ADMIN, Role.SUPER_ADMIN)),
 ):
-    """Lists the most recent sign-ins across every account: who logged in,
-    from what IP, and when. Visible to ADMIN and SUPER_ADMIN."""
-    return list_recent_logins()
+    """Lists the most recent sign-ins: who logged in, from what IP, and
+    when. ADMIN sees USER accounts only, SUPER_ADMIN also sees ADMIN
+    accounts. The caller never sees their own logins."""
+    return list_recent_logins(current_user)
 
 
 @router.get("/stats/usage")
 async def list_token_usage(
     current_user: dict = Depends(require_roles(Role.ADMIN, Role.SUPER_ADMIN)),
 ):
-    """Lists every user's running token usage total. Visible to ADMIN and
-    SUPER_ADMIN."""
-    return list_usage_totals()
+    """Lists running token usage totals per account. ADMIN sees USER
+    accounts only, SUPER_ADMIN also sees ADMIN accounts. The caller never
+    sees their own usage."""
+    return list_usage_totals(current_user)
