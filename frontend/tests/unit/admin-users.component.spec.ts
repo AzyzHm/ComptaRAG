@@ -46,12 +46,44 @@ describe('AdminUsersComponent', () => {
     expect(await screen.findByText('them@example.com')).toBeTruthy();
   });
 
-  it('gives an ADMIN viewer no role selector or delete button at all', async () => {
+  it('gives an ADMIN viewer no role selector, but a delete button for a USER account', async () => {
     await renderPage('ADMIN', usersForAdminViewer);
 
     await screen.findByText('them@example.com');
     expect(screen.queryByRole('combobox')).toBeNull();
-    expect(screen.queryByRole('button', { name: /delete/i })).toBeNull();
+    expect(screen.getByRole('button', { name: /delete/i })).toBeTruthy();
+  });
+
+  it('lets an ADMIN delete a USER account after confirming', async () => {
+    const confirmSpy = jest.spyOn(window, 'confirm').mockReturnValue(true);
+    const { deleteUser } = await renderPage('ADMIN', usersForAdminViewer);
+
+    await screen.findByText('them@example.com');
+    const targetRow = screen.getByText('them@example.com').closest('tr') as HTMLElement;
+
+    const user = userEvent.setup();
+    await user.click(within(targetRow).getByRole('button', { name: /delete/i }));
+
+    expect(confirmSpy).toHaveBeenCalled();
+    expect(deleteUser).toHaveBeenCalledWith('target-uid');
+
+    confirmSpy.mockRestore();
+  });
+
+  it('never offers an ADMIN a delete button for a non-USER row, matching the backend rule', async () => {
+    await renderPage('ADMIN', [
+      ...usersForAdminViewer,
+      {
+        uid: 'admin-row-uid',
+        email: 'other-admin@example.com',
+        display_name: 'Other',
+        role: 'ADMIN'
+      }
+    ]);
+
+    await screen.findByText('other-admin@example.com');
+    const adminRow = screen.getByText('other-admin@example.com').closest('tr') as HTMLElement;
+    expect(within(adminRow).queryByRole('button', { name: /delete/i })).toBeNull();
   });
 
   it('lets a SUPER_ADMIN promote a USER to ADMIN, offering only USER and ADMIN', async () => {
@@ -154,5 +186,24 @@ describe('AdminUsersComponent', () => {
     await renderPage('ADMIN', usersForAdminViewer, { listUsers });
 
     expect(listUsers).toHaveBeenCalled();
+  });
+
+  it('shows a total users KPI but no total admins KPI for an ADMIN viewer', async () => {
+    await renderPage('ADMIN', usersForAdminViewer);
+
+    await screen.findByText('them@example.com');
+    expect(screen.getByText('Total users')).toBeTruthy();
+    expect(screen.queryByText('Total admins')).toBeNull();
+  });
+
+  it('shows both KPIs, correctly counted, for a SUPER_ADMIN viewer', async () => {
+    await renderPage('SUPER_ADMIN', usersForSuperAdminViewer);
+
+    await screen.findByText('them@example.com');
+    const usersKpi = screen.getByText('Total users').closest('.admin-kpi') as HTMLElement;
+    const adminsKpi = screen.getByText('Total admins').closest('.admin-kpi') as HTMLElement;
+
+    expect(within(usersKpi).getByText('1')).toBeTruthy();
+    expect(within(adminsKpi).getByText('1')).toBeTruthy();
   });
 });

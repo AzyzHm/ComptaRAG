@@ -1,6 +1,7 @@
 from google.cloud.firestore_v1 import SERVER_TIMESTAMP, Increment
 
 from config.firebase import get_firestore_client
+from models.roles import Role
 
 LOGIN_EVENTS_COLLECTION = "login_events"
 USAGE_TOTALS_COLLECTION = "usage_totals"
@@ -36,15 +37,55 @@ def record_login(uid: str, email: str | None, ip: str | None, user_agent: str | 
     )
 
 
-def list_recent_logins(limit: int = RECENT_LOGINS_LIMIT) -> list[dict]:
-    """Returns the most recent login events, newest first."""
+def _visible_users(viewer: dict) -> dict[str, dict]:
+    """Returns {uid: profile} for every account the viewer is allowed to see
+    on the admin dashboard, using the same rule as the user list: ADMIN sees
+    USER accounts, SUPER_ADMIN sees USER and ADMIN accounts. The viewer's own
+    account is never included, so nobody ever sees themselves in a log or
+    usage list."""
     db = get_firestore_client()
-    query = (
-        db.collection(LOGIN_EVENTS_COLLECTION)
-        .order_by("created_at", direction="DESCENDING")
-        .limit(limit)
+    visible_roles = (
+        {Role.USER.value, Role.ADMIN.value}
+        if viewer["role"] == Role.SUPER_ADMIN.value
+        else {Role.USER.value}
     )
-    return [{"id": doc.id, **doc.to_dict()} for doc in query.stream()]
+    visible: dict[str, dict] = {}
+    for doc in db.collection(USERS_COLLECTION).stream():
+        if doc.id == viewer["uid"]:
+            continue
+        profile = doc.to_dict()
+        if profile.get("role") in visible_roles:
+            visible[doc.id] = profile
+    return visible
+
+
+def list_recent_logins(viewer: dict, limit: int = RECENT_LOGINS_LIMIT) -> list[dict]:
+    """Returns the most recent login events for accounts the viewer is
+    allowed to see, newest first: ADMIN sees USER logins, SUPER_ADMIN sees
+    USER and ADMIN logins. The viewer's own logins are never included, and
+    each event is enriched with the account's current display name and role
+    so the dashboard doesn't need a second lookup."""
+    visible_users = _visible_users(viewer)
+    db = get_firestore_client()
+    query = db.collection(LOGIN_EVENTS_COLLECTION).order_by("created_at", direction="DESCENDING")
+
+    events: list[dict] = []
+    for doc in query.stream():
+        event = doc.to_dict()
+        profile = visible_users.get(event.get("uid"))
+        if profile is None:
+            continue
+        events.append(
+            {
+                "id": doc.id,
+                **event,
+                "display_name": profile.get("display_name"),
+                "role": profile.get("role"),
+            }
+        )
+        if len(events) >= limit:
+            break
+    return events
 
 
 def record_usage(uid: str, token_usage: dict) -> None:
@@ -64,9 +105,26 @@ def record_usage(uid: str, token_usage: dict) -> None:
     )
 
 
-def list_usage_totals() -> list[dict]:
-    """Returns every user's running token usage total."""
+def list_usage_totals(viewer: dict) -> list[dict]:
+    """Returns running token usage totals for accounts the viewer is allowed
+    to see, enriched with each account's email, display name, and role:
+    ADMIN sees USER totals, SUPER_ADMIN sees USER and ADMIN totals. The
+    viewer's own usage is never included."""
+    visible_users = _visible_users(viewer)
     db = get_firestore_client()
-    return [
-        {"uid": doc.id, **doc.to_dict()} for doc in db.collection(USAGE_TOTALS_COLLECTION).stream()
-    ]
+
+    totals: list[dict] = []
+    for doc in db.collection(USAGE_TOTALS_COLLECTION).stream():
+        profile = visible_users.get(doc.id)
+        if profile is None:
+            continue
+        totals.append(
+            {
+                "uid": doc.id,
+                "email": profile.get("email"),
+                "display_name": profile.get("display_name"),
+                "role": profile.get("role"),
+                **doc.to_dict(),
+            }
+        )
+    return totals

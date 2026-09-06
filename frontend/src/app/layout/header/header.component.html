@@ -13,7 +13,7 @@
     @if (authService.isAuthenticated()) {
       <div class="app-header__account">
         @if (authService.role() === 'ADMIN' || authService.role() === 'SUPER_ADMIN') {
-          <a routerLink="/admin/users" class="app-header__nav-link">Manage users</a>
+          <a routerLink="/admin/users" class="app-header__nav-link">Admin</a>
         }
 
         <button type="button" class="app-header__user" (click)="openProfileModal()">

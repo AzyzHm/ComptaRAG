@@ -50,14 +50,78 @@ class TestRecordLogin:
 
 class TestListRecentLogins:
     def test_orders_newest_first_and_respects_limit(self, monkeypatch):
-        fake_db = FakeFirestore()
+        fake_db = FakeFirestore(seed={"users": {"u1": {"role": "USER"}}})
         _wire(monkeypatch, fake_db)
         for i in range(3):
             fake_db.collection("login_events").document(f"e{i}").set({"uid": "u1", "created_at": i})
 
-        result = stats_mod.list_recent_logins(limit=2)
+        result = stats_mod.list_recent_logins({"uid": "admin-1", "role": "ADMIN"}, limit=2)
 
         assert [e["created_at"] for e in result] == [2, 1]
+
+    def test_admin_only_sees_user_logins(self, monkeypatch):
+        fake_db = FakeFirestore(
+            seed={
+                "users": {
+                    "u1": {"role": "USER", "display_name": "Ali"},
+                    "a1": {"role": "ADMIN", "display_name": "Bea"},
+                }
+            }
+        )
+        _wire(monkeypatch, fake_db)
+        fake_db.collection("login_events").document("e1").set({"uid": "u1", "created_at": 1})
+        fake_db.collection("login_events").document("e2").set({"uid": "a1", "created_at": 2})
+
+        result = stats_mod.list_recent_logins({"uid": "admin-1", "role": "ADMIN"})
+
+        assert [e["uid"] for e in result] == ["u1"]
+
+    def test_super_admin_sees_user_and_admin_logins(self, monkeypatch):
+        fake_db = FakeFirestore(
+            seed={
+                "users": {
+                    "u1": {"role": "USER"},
+                    "a1": {"role": "ADMIN"},
+                }
+            }
+        )
+        _wire(monkeypatch, fake_db)
+        fake_db.collection("login_events").document("e1").set({"uid": "u1", "created_at": 1})
+        fake_db.collection("login_events").document("e2").set({"uid": "a1", "created_at": 2})
+
+        result = stats_mod.list_recent_logins({"uid": "super-1", "role": "SUPER_ADMIN"})
+
+        assert {e["uid"] for e in result} == {"u1", "a1"}
+
+    def test_viewer_never_sees_their_own_logins(self, monkeypatch):
+        fake_db = FakeFirestore(seed={"users": {"admin-1": {"role": "ADMIN"}}})
+        _wire(monkeypatch, fake_db)
+        fake_db.collection("login_events").document("e1").set({"uid": "admin-1", "created_at": 1})
+
+        result = stats_mod.list_recent_logins({"uid": "admin-1", "role": "SUPER_ADMIN"})
+
+        assert result == []
+
+    def test_enriches_events_with_display_name_and_role(self, monkeypatch):
+        fake_db = FakeFirestore(seed={"users": {"u1": {"role": "USER", "display_name": "Ali"}}})
+        _wire(monkeypatch, fake_db)
+        fake_db.collection("login_events").document("e1").set(
+            {"uid": "u1", "email": "a@a.com", "ip": "1.1.1.1", "created_at": 1}
+        )
+
+        result = stats_mod.list_recent_logins({"uid": "admin-1", "role": "ADMIN"})
+
+        assert result == [
+            {
+                "id": "e1",
+                "uid": "u1",
+                "email": "a@a.com",
+                "ip": "1.1.1.1",
+                "created_at": 1,
+                "display_name": "Ali",
+                "role": "USER",
+            }
+        ]
 
 
 class TestRecordUsage:
@@ -91,17 +155,103 @@ class TestRecordUsage:
 
 
 class TestListUsageTotals:
-    def test_returns_every_user_s_totals(self, monkeypatch):
+    def test_returns_totals_for_every_visible_user(self, monkeypatch):
         fake_db = FakeFirestore(
             seed={
+                "users": {
+                    "u1": {"role": "USER", "email": "a@a.com", "display_name": "Ali"},
+                    "u2": {"role": "USER", "email": "b@b.com", "display_name": "Bea"},
+                },
                 "usage_totals": {
                     "u1": {"total_tokens": 10, "message_count": 1},
                     "u2": {"total_tokens": 20, "message_count": 2},
-                }
+                },
             }
         )
         _wire(monkeypatch, fake_db)
 
-        result = stats_mod.list_usage_totals()
+        result = stats_mod.list_usage_totals({"uid": "admin-1", "role": "ADMIN"})
 
         assert {r["uid"] for r in result} == {"u1", "u2"}
+
+    def test_admin_only_sees_user_usage(self, monkeypatch):
+        fake_db = FakeFirestore(
+            seed={
+                "users": {
+                    "u1": {"role": "USER"},
+                    "a1": {"role": "ADMIN"},
+                },
+                "usage_totals": {
+                    "u1": {"total_tokens": 10, "message_count": 1},
+                    "a1": {"total_tokens": 99, "message_count": 9},
+                },
+            }
+        )
+        _wire(monkeypatch, fake_db)
+
+        result = stats_mod.list_usage_totals({"uid": "admin-1", "role": "ADMIN"})
+
+        assert [r["uid"] for r in result] == ["u1"]
+
+    def test_super_admin_sees_user_and_admin_usage(self, monkeypatch):
+        fake_db = FakeFirestore(
+            seed={
+                "users": {
+                    "u1": {"role": "USER"},
+                    "a1": {"role": "ADMIN"},
+                },
+                "usage_totals": {
+                    "u1": {"total_tokens": 10, "message_count": 1},
+                    "a1": {"total_tokens": 99, "message_count": 9},
+                },
+            }
+        )
+        _wire(monkeypatch, fake_db)
+
+        result = stats_mod.list_usage_totals({"uid": "super-1", "role": "SUPER_ADMIN"})
+
+        assert {r["uid"] for r in result} == {"u1", "a1"}
+
+    def test_viewer_never_sees_their_own_usage(self, monkeypatch):
+        fake_db = FakeFirestore(
+            seed={
+                "users": {"super-1": {"role": "SUPER_ADMIN"}},
+                "usage_totals": {"super-1": {"total_tokens": 10, "message_count": 1}},
+            }
+        )
+        _wire(monkeypatch, fake_db)
+
+        result = stats_mod.list_usage_totals({"uid": "super-1", "role": "SUPER_ADMIN"})
+
+        assert result == []
+
+    def test_enriches_totals_with_email_display_name_and_role(self, monkeypatch):
+        fake_db = FakeFirestore(
+            seed={
+                "users": {"u1": {"role": "USER", "email": "a@a.com", "display_name": "Ali"}},
+                "usage_totals": {
+                    "u1": {
+                        "prompt_tokens": 10,
+                        "completion_tokens": 5,
+                        "total_tokens": 15,
+                        "message_count": 1,
+                    }
+                },
+            }
+        )
+        _wire(monkeypatch, fake_db)
+
+        result = stats_mod.list_usage_totals({"uid": "admin-1", "role": "ADMIN"})
+
+        assert result == [
+            {
+                "uid": "u1",
+                "email": "a@a.com",
+                "display_name": "Ali",
+                "role": "USER",
+                "prompt_tokens": 10,
+                "completion_tokens": 5,
+                "total_tokens": 15,
+                "message_count": 1,
+            }
+        ]

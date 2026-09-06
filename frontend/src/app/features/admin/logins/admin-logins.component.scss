@@ -1,0 +1,76 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.admin-logins {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: $spacing-lg;
+
+  @media (max-width: $breakpoint-sm) {
+    padding: $spacing-md;
+  }
+}
+
+.admin-logins__title {
+  font-size: 1.5rem;
+}
+
+.admin-logins__subtitle {
+  margin: $spacing-xs 0 $spacing-lg;
+  color: $color-ink-muted;
+  font-size: 0.875rem;
+}
+
+.admin-logins__error {
+  margin: 0 0 $spacing-md;
+  padding: $spacing-sm $spacing-md;
+  border-radius: $radius-sm;
+  border: 1px solid $color-danger;
+  color: $color-danger;
+  font-size: 0.875rem;
+}
+
+.admin-logins__status {
+  color: $color-ink-muted;
+}
+
+.admin-logins__table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid $color-rule;
+  border-radius: $radius-md;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-logins__table {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: collapse;
+  background-color: $color-paper-raised;
+
+  th,
+  td {
+    text-align: left;
+    padding: $spacing-sm $spacing-md;
+    border-bottom: 1px solid $color-rule;
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+
+  th {
+    font-family: $font-display;
+    font-weight: 600;
+    color: $color-ink-muted;
+    background-color: $color-paper;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+}

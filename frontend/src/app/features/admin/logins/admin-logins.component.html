@@ -1,0 +1,39 @@
+<section class="admin-logins">
+  <h1 class="admin-logins__title">Login activity</h1>
+  <p class="admin-logins__subtitle">Recent sign-ins, newest first, with the IP address used.</p>
+
+  @if (error()) {
+    <p class="admin-logins__error" role="alert">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <p class="admin-logins__status">Loading login activity…</p>
+  } @else if (events().length === 0) {
+    <p class="admin-logins__status">No login activity to show yet.</p>
+  } @else {
+    <div class="admin-logins__table-wrapper">
+      <table class="admin-logins__table">
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Name</th>
+            <th>Role</th>
+            <th>IP address</th>
+            <th>Logged in at</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (event of events(); track event.id) {
+            <tr>
+              <td>{{ event.email ?? '—' }}</td>
+              <td>{{ event.display_name ?? '—' }}</td>
+              <td><app-role-badge [role]="event.role" /></td>
+              <td>{{ event.ip ?? '—' }}</td>
+              <td>{{ event.created_at ? (event.created_at | date: 'medium') : '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

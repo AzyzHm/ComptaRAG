@@ -6,7 +6,7 @@
   width: 100%;
 }
 
-.admin-users {
+.admin-usage {
   width: 100%;
   max-width: 900px;
   margin: 0 auto;
@@ -17,17 +17,17 @@
   }
 }
 
-.admin-users__title {
+.admin-usage__title {
   font-size: 1.5rem;
 }
 
-.admin-users__subtitle {
+.admin-usage__subtitle {
   margin: $spacing-xs 0 $spacing-lg;
   color: $color-ink-muted;
   font-size: 0.875rem;
 }
 
-.admin-users__error {
+.admin-usage__error {
   margin: 0 0 $spacing-md;
   padding: $spacing-sm $spacing-md;
   border-radius: $radius-sm;
@@ -36,11 +36,11 @@
   font-size: 0.875rem;
 }
 
-.admin-users__status {
+.admin-usage__status {
   color: $color-ink-muted;
 }
 
-.admin-users__kpis {
+.admin-usage__kpis {
   display: flex;
   flex-wrap: wrap;
   gap: $spacing-md;
@@ -70,17 +70,31 @@
   color: $color-ink-muted;
 }
 
-.admin-users__table-wrapper {
+.admin-usage__search {
   width: 100%;
+  margin-bottom: $spacing-md;
+  padding: $spacing-sm $spacing-md;
+  border-radius: $radius-sm;
+  border: 1px solid $color-rule;
+  background-color: $color-paper;
+  color: $color-ink;
+  font-size: 0.875rem;
+  @include focus-ring;
+}
+
+.admin-usage__list-wrapper {
+  width: 100%;
+  max-height: 420px;
+  overflow-y: auto;
   overflow-x: auto;
   border: 1px solid $color-rule;
   border-radius: $radius-md;
   -webkit-overflow-scrolling: touch;
 }
 
-.admin-users__table {
+.admin-usage__table {
   width: 100%;
-  min-width: 480px;
+  min-width: 640px;
   border-collapse: collapse;
   background-color: $color-paper-raised;
 
@@ -94,6 +108,8 @@
   }
 
   th {
+    position: sticky;
+    top: 0;
     font-family: $font-display;
     font-weight: 600;
     color: $color-ink-muted;
@@ -102,44 +118,5 @@
 
   tr:last-child td {
     border-bottom: none;
-  }
-}
-
-.admin-users__select {
-  padding: $spacing-xs $spacing-sm;
-  border-radius: $radius-sm;
-  border: 1px solid $color-rule;
-  background-color: $color-paper;
-  color: $color-ink;
-  font-size: 0.8125rem;
-  @include focus-ring;
-
-  &:disabled {
-    opacity: 0.6;
-  }
-}
-
-.admin-users__locked {
-  color: $color-ink-muted;
-}
-
-.admin-users__delete {
-  padding: $spacing-xs $spacing-sm;
-  border-radius: $radius-sm;
-  border: 1px solid $color-danger;
-  background-color: transparent;
-  color: $color-danger;
-  font-size: 0.8125rem;
-  cursor: pointer;
-  transition: background-color 0.15s $ease-out;
-  @include focus-ring;
-
-  &:hover:not(:disabled) {
-    background-color: tint($color-danger, 12%);
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: default;
   }
 }

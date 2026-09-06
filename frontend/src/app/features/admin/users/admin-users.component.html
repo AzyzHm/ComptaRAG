@@ -4,12 +4,28 @@
     @if (viewerIsSuperAdmin()) {
       Promote or demote accounts between User and Admin, or remove an account entirely.
     } @else {
-      Accounts with the User role. Only the Super admin can change roles or remove an account.
+      Accounts with the User role. Only the Super admin can change roles, but you can remove an
+      account.
     }
   </p>
 
   @if (error()) {
     <p class="admin-users__error" role="alert">{{ error() }}</p>
+  }
+
+  @if (!loading()) {
+    <div class="admin-users__kpis">
+      <div class="admin-kpi">
+        <span class="admin-kpi__value">{{ totalUsers() }}</span>
+        <span class="admin-kpi__label">Total users</span>
+      </div>
+      @if (viewerIsSuperAdmin()) {
+        <div class="admin-kpi">
+          <span class="admin-kpi__value">{{ totalAdmins() }}</span>
+          <span class="admin-kpi__label">Total admins</span>
+        </div>
+      }
+    </div>
   }
 
   @if (loading()) {
@@ -24,8 +40,8 @@
             <th>Role</th>
             @if (viewerIsSuperAdmin()) {
               <th>Change role</th>
-              <th>Delete</th>
             }
+            <th>Delete</th>
           </tr>
         </thead>
         <tbody>
@@ -51,21 +67,21 @@
                     <span class="admin-users__locked">—</span>
                   }
                 </td>
-                <td>
-                  @if (canDelete(user)) {
-                    <button
-                      type="button"
-                      class="admin-users__delete"
-                      [disabled]="pendingUid() === user.uid"
-                      (click)="deleteUser(user)"
-                    >
-                      Delete
-                    </button>
-                  } @else {
-                    <span class="admin-users__locked">—</span>
-                  }
-                </td>
               }
+              <td>
+                @if (canDelete(user)) {
+                  <button
+                    type="button"
+                    class="admin-users__delete"
+                    [disabled]="pendingUid() === user.uid"
+                    (click)="deleteUser(user)"
+                  >
+                    Delete
+                  </button>
+                } @else {
+                  <span class="admin-users__locked">—</span>
+                }
+              </td>
             </tr>
           }
         </tbody>
