@@ -1,0 +1,122 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.admin-usage {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: $spacing-lg;
+
+  @media (max-width: $breakpoint-sm) {
+    padding: $spacing-md;
+  }
+}
+
+.admin-usage__title {
+  font-size: 1.5rem;
+}
+
+.admin-usage__subtitle {
+  margin: $spacing-xs 0 $spacing-lg;
+  color: $color-ink-muted;
+  font-size: 0.875rem;
+}
+
+.admin-usage__error {
+  margin: 0 0 $spacing-md;
+  padding: $spacing-sm $spacing-md;
+  border-radius: $radius-sm;
+  border: 1px solid $color-danger;
+  color: $color-danger;
+  font-size: 0.875rem;
+}
+
+.admin-usage__status {
+  color: $color-ink-muted;
+}
+
+.admin-usage__kpis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+}
+
+.admin-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: $spacing-sm $spacing-md;
+  border: 1px solid $color-rule;
+  border-radius: $radius-md;
+  background-color: $color-paper-raised;
+  min-width: 120px;
+}
+
+.admin-kpi__value {
+  font-family: $font-display;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: $color-ink;
+}
+
+.admin-kpi__label {
+  font-size: 0.75rem;
+  color: $color-ink-muted;
+}
+
+.admin-usage__search {
+  width: 100%;
+  margin-bottom: $spacing-md;
+  padding: $spacing-sm $spacing-md;
+  border-radius: $radius-sm;
+  border: 1px solid $color-rule;
+  background-color: $color-paper;
+  color: $color-ink;
+  font-size: 0.875rem;
+  @include focus-ring;
+}
+
+.admin-usage__list-wrapper {
+  width: 100%;
+  max-height: 420px;
+  overflow-y: auto;
+  overflow-x: auto;
+  border: 1px solid $color-rule;
+  border-radius: $radius-md;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-usage__table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  background-color: $color-paper-raised;
+
+  th,
+  td {
+    text-align: left;
+    padding: $spacing-sm $spacing-md;
+    border-bottom: 1px solid $color-rule;
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+
+  th {
+    position: sticky;
+    top: 0;
+    font-family: $font-display;
+    font-weight: 600;
+    color: $color-ink-muted;
+    background-color: $color-paper;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+}
