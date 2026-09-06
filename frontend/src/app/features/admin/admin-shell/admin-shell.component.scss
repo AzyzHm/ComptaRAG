@@ -1,0 +1,48 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.admin-shell {
+  width: 100%;
+}
+
+.admin-shell__tabs {
+  display: flex;
+  gap: $spacing-xs;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: $spacing-lg $spacing-lg 0;
+  border-bottom: 1px solid $color-rule;
+
+  @media (max-width: $breakpoint-sm) {
+    padding: $spacing-md $spacing-md 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+.admin-shell__tab {
+  padding: $spacing-sm $spacing-md;
+  border-bottom: 2px solid transparent;
+  color: $color-ink-muted;
+  font-family: $font-display;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.15s $ease-out;
+  @include focus-ring;
+
+  &:hover {
+    color: $color-ink;
+  }
+
+  &--active {
+    color: $color-primary-dark;
+    border-bottom-color: $color-primary;
+  }
+}

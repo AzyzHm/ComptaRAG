@@ -1,0 +1,15 @@
+<div class="admin-shell">
+  <nav class="admin-shell__tabs" aria-label="Admin sections">
+    <a routerLink="users" routerLinkActive="admin-shell__tab--active" class="admin-shell__tab">
+      Users
+    </a>
+    <a routerLink="logins" routerLinkActive="admin-shell__tab--active" class="admin-shell__tab">
+      Login activity
+    </a>
+    <a routerLink="usage" routerLinkActive="admin-shell__tab--active" class="admin-shell__tab">
+      Usage
+    </a>
+  </nav>
+
+  <router-outlet />
+</div>
