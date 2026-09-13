@@ -6,6 +6,7 @@ import {
   inject,
   signal
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { AuthService } from '@core/services/auth.service';
@@ -35,7 +36,7 @@ function friendlyProfileError(error: unknown): string {
 @Component({
   selector: 'app-profile-modal',
   standalone: true,
-  imports: [FormsModule, ButtonComponent, ModalComponent],
+  imports: [FormsModule, NgTemplateOutlet, ButtonComponent, ModalComponent],
   templateUrl: './profile-modal.component.html',
   styleUrl: './profile-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

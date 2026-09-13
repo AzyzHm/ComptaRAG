@@ -42,7 +42,9 @@
 
 .admin-logins__table-wrapper {
   width: 100%;
+  max-height: 60vh;
   overflow-x: auto;
+  overflow-y: auto;
   border: 1px solid $color-rule;
   border-radius: $radius-md;
   -webkit-overflow-scrolling: touch;
@@ -64,6 +66,9 @@
   }
 
   th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
     font-family: $font-display;
     font-weight: 600;
     color: $color-ink-muted;

@@ -6,6 +6,12 @@
   min-height: 100vh;
 }
 
+:host(.app-shell--locked) {
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .app-content {
   flex: 1;
   display: flex;

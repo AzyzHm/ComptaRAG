@@ -7,6 +7,7 @@ from graph.state import GraphState
 logger = get_logger(__name__)
 
 _EMPTY_TOKEN_USAGE = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+_PROVIDERS_DOWN_MESSAGE = "There are some internal errors with our models, please try again later."
 
 
 def _extract_token_usage(response) -> dict:
@@ -58,5 +59,9 @@ def generate_answer_node(state: GraphState):
     response = getResponseFromLLM(
         system_prompt=expert_prompt, user_prompt=user_msg, model_temp=0.5, format="text"
     )
+
+    if not response.text:
+        logger.error("Both LLM providers failed to produce an answer")
+        return {"answer": _PROVIDERS_DOWN_MESSAGE, "token_usage": dict(_EMPTY_TOKEN_USAGE)}
 
     return {"answer": response.text, "token_usage": _extract_token_usage(response)}

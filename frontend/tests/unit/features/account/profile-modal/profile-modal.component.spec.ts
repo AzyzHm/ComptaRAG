@@ -110,15 +110,26 @@ describe('ProfileModalComponent', () => {
     expect(updatePassword).toHaveBeenCalledWith('secret-one', 'hunter22');
   });
 
-  it('toggles the password fields between hidden and visible text', async () => {
+  it('toggles all three password fields between hidden and visible text', async () => {
     await renderModal();
 
     const newPasswordInput = screen.getByLabelText('New password') as HTMLInputElement;
-    expect(newPasswordInput.type).toBe('password');
+    const confirmPasswordInput = screen.getByLabelText('Confirm new password') as HTMLInputElement;
+    const currentPasswordInput = screen.getByLabelText('Current password') as HTMLInputElement;
 
-    await userEvent.setup().click(screen.getByRole('button', { name: /show passwords/i }));
+    expect(newPasswordInput.type).toBe('password');
+    expect(confirmPasswordInput.type).toBe('password');
+    expect(currentPasswordInput.type).toBe('password');
+
+    const revealButtons = screen.getAllByRole('button', { name: /show passwords/i });
+    expect(revealButtons).toHaveLength(3);
+
+    await userEvent.setup().click(revealButtons[0]);
 
     expect(newPasswordInput.type).toBe('text');
+    expect(confirmPasswordInput.type).toBe('text');
+    expect(currentPasswordInput.type).toBe('text');
+    expect(screen.getAllByRole('button', { name: /hide passwords/i })).toHaveLength(3);
   });
 
   it('closes when the modal close button is clicked', async () => {
