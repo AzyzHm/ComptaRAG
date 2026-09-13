@@ -168,3 +168,30 @@ class TestGenerateNode:
         monkeypatch.setattr(generate_mod, "getResponseFromLLM", lambda **kw: FakeResponse("answer"))
         result = generate_mod.generate_answer_node(base_state(context="c"))
         assert result["token_usage"] == ZERO_USAGE
+
+
+class TestBothProvidersDown:
+    def test_returns_internal_error_message_when_response_text_is_none(self, monkeypatch):
+        monkeypatch.setattr(generate_mod, "getResponseFromLLM", lambda **kw: FakeResponse(None))
+        result = generate_mod.generate_answer_node(base_state(context="c"))
+
+        assert result == {
+            "answer": "There are some internal errors with our models, please try again later.",
+            "token_usage": ZERO_USAGE,
+        }
+
+    def test_returns_internal_error_message_when_response_text_is_empty_string(self, monkeypatch):
+        monkeypatch.setattr(generate_mod, "getResponseFromLLM", lambda **kw: FakeResponse(""))
+        result = generate_mod.generate_answer_node(base_state(context="c"))
+
+        assert result["answer"] == (
+            "There are some internal errors with our models, please try again later."
+        )
+        assert result["token_usage"] == ZERO_USAGE
+
+    def test_does_not_surface_the_internal_error_message_when_text_is_present(self, monkeypatch):
+        monkeypatch.setattr(
+            generate_mod, "getResponseFromLLM", lambda **kw: FakeResponse("A real answer.")
+        )
+        result = generate_mod.generate_answer_node(base_state(context="c"))
+        assert result["answer"] == "A real answer."
