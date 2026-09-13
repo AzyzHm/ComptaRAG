@@ -80,7 +80,16 @@
     gap: $spacing-md;
 
     @media (max-width: $breakpoint-sm) {
+      flex: 1 1 100%;
+      justify-content: space-between;
       gap: $spacing-sm;
+      margin-top: $spacing-xs;
+      padding-top: $spacing-sm;
+      border-top: 1px solid $glass-border;
+
+      > app-theme-toggle {
+        flex-shrink: 0;
+      }
     }
   }
 
@@ -122,13 +131,9 @@
   &__user-name {
     font-size: 0.875rem;
     color: $color-ink;
-    max-width: 160px;
-    overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
 
     @media (max-width: $breakpoint-sm) {
-      max-width: 96px;
       font-size: 0.8125rem;
     }
   }

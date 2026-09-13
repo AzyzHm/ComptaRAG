@@ -13,13 +13,11 @@
     @if (authService.isAuthenticated()) {
       <div class="app-header__account">
         @if (authService.role() === 'ADMIN' || authService.role() === 'SUPER_ADMIN') {
-          <a routerLink="/admin/users" class="app-header__nav-link">Admin</a>
+          <a routerLink="/admin/users" class="app-header__nav-link">AdminSpace</a>
         }
 
         <button type="button" class="app-header__user" (click)="openProfileModal()">
-          <span class="app-header__user-name">
-            {{ authService.profile()?.display_name || authService.profile()?.email }}
-          </span>
+          <span class="app-header__user-name">Edit Profile</span>
           @if (authService.role(); as role) {
             <app-role-badge [role]="role" />
           }
