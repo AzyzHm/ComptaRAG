@@ -12,7 +12,10 @@ import { FooterComponent } from '@app/layout/footer/footer.component';
   imports: [RouterOutlet, HeaderComponent, FooterComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '[class.app-shell--locked]': 'isChatRoute()'
+  }
 })
 export class AppComponent {
   private readonly router = inject(Router);
