@@ -3,7 +3,6 @@
 
 .composer {
   padding: $spacing-md $spacing-lg;
-  border-top: 1px solid $color-rule;
 
   @media (max-width: $breakpoint-sm) {
     padding: $spacing-md;
