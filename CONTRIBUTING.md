@@ -1,6 +1,6 @@
 # Contributing to ComptaRAG
 
-Thanks for your interest in contributing! ComptaRAG is still under active development, so check open issues and the `main` branch before starting significant work, to avoid overlapping with in-progress changes.
+Thanks for your interest in contributing! ComptaRAG is not under active development, so there is no ongoing work of ours to overlap with, but it's still worth checking [existing issues](../../issues) and the `main` branch before starting on something, in case someone else's fix or feature is already in flight.
 
 ## Before you start
 

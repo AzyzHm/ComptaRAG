@@ -2,7 +2,7 @@
 
 ## Reporting a vulnerability
 
-ComptaRAG is under active development, and we take security issues seriously, especially given the upcoming authentication and user-management components.
+ComptaRAG is not under active development, but we still take security issues seriously, especially given its authentication and user-management components.
 
 If you discover a serious security vulnerability (e.g. authentication bypass, data exposure, injection vulnerability, credential leakage, or anything that could compromise users or the system), **please do not open a public GitHub issue**. Public issues are visible to everyone, including anyone who might exploit the vulnerability before it's fixed.
 
@@ -25,6 +25,6 @@ When reporting, please include as much of the following as you can:
 
 ## Scope
 
-This project is under active development, some components, including Firebase authentication, are still being built. If you're testing early builds, please treat any staging or test deployment credentials as private and avoid testing against services you don't own.
+This project is not under active development, its authentication and user-management components (built on Firebase) are complete rather than early builds. If you're testing against a deployment, please still treat any staging or test credentials as private and avoid testing against services you don't own.
 
 Thank you for helping keep ComptaRAG and its future users safe.
