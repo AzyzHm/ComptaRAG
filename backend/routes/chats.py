@@ -1,9 +1,10 @@
 import json
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 
 from core.logger import get_logger
+from core.rate_limit import CHAT_MESSAGE_RATE_LIMIT, CHAT_RATE_LIMIT, limiter
 from core.security import require_approved
 from graph.workflow import NODE_LABELS, app
 from schemas.chats import MessageRequest, RenameRequest
@@ -93,19 +94,24 @@ def _stream_chat_reply(chat_id: str, query: str, history: list[dict], uid: str, 
 
 
 @router.post("/")
-async def start_chat(current_user: dict = Depends(require_approved)):
+@limiter.limit(CHAT_RATE_LIMIT)
+async def start_chat(request: Request, current_user: dict = Depends(require_approved)):
     """Creates a new, empty chat owned by the caller."""
     return create_chat(current_user["uid"])
 
 
 @router.get("/")
-async def list_my_chats(current_user: dict = Depends(require_approved)):
+@limiter.limit(CHAT_RATE_LIMIT)
+async def list_my_chats(request: Request, current_user: dict = Depends(require_approved)):
     """Lists the caller's chats, most recently active first."""
     return list_chats(current_user["uid"])
 
 
 @router.get("/{chat_id}")
-async def get_chat_detail(chat_id: str, current_user: dict = Depends(require_approved)):
+@limiter.limit(CHAT_RATE_LIMIT)
+async def get_chat_detail(
+    request: Request, chat_id: str, current_user: dict = Depends(require_approved)
+):
     """Returns a chat and its full message history. Only the owner can read it."""
     chat = _owned_chat_or_404(chat_id, current_user["uid"])
     chat["messages"] = get_messages(chat_id)
@@ -113,8 +119,12 @@ async def get_chat_detail(chat_id: str, current_user: dict = Depends(require_app
 
 
 @router.patch("/{chat_id}")
+@limiter.limit(CHAT_RATE_LIMIT)
 async def rename_my_chat(
-    chat_id: str, body: RenameRequest, current_user: dict = Depends(require_approved)
+    request: Request,
+    chat_id: str,
+    body: RenameRequest,
+    current_user: dict = Depends(require_approved),
 ):
     """Renames a chat. Only the owner can rename it."""
     _owned_chat_or_404(chat_id, current_user["uid"])
@@ -123,15 +133,22 @@ async def rename_my_chat(
 
 
 @router.delete("/{chat_id}", status_code=204)
-async def delete_my_chat(chat_id: str, current_user: dict = Depends(require_approved)):
+@limiter.limit(CHAT_RATE_LIMIT)
+async def delete_my_chat(
+    request: Request, chat_id: str, current_user: dict = Depends(require_approved)
+):
     """Deletes a chat and all of its messages. Only the owner can delete it."""
     _owned_chat_or_404(chat_id, current_user["uid"])
     delete_chat(chat_id)
 
 
 @router.post("/{chat_id}/messages")
+@limiter.limit(CHAT_MESSAGE_RATE_LIMIT)
 async def send_message(
-    chat_id: str, body: MessageRequest, current_user: dict = Depends(require_approved)
+    request: Request,
+    chat_id: str,
+    body: MessageRequest,
+    current_user: dict = Depends(require_approved),
 ):
     """Sends a message in an existing chat and streams the agent's progress.
 
@@ -147,7 +164,10 @@ async def send_message(
     agent failed. Stores both the user's message and the assistant's reply,
     and rolls the reply's token cost into the caller's usage totals. The
     chat's title is left untouched, it stays "Untitled chat" (or whatever
-    the owner renamed it to) until they rename it.
+    the owner renamed it to) until they rename it. Also capped by
+    CHAT_MESSAGE_RATE_LIMIT (core.rate_limit), a per-minute burst limit that
+    is separate from and stricter than the daily/monthly token quota above,
+    it protects against a single caller firing many agent runs at once.
     """
     _owned_chat_or_404(chat_id, current_user["uid"])
     uid = current_user["uid"]
