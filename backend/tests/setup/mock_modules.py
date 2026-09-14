@@ -6,6 +6,7 @@ os.environ.setdefault("gemini_api_key", "fake-gemini-key")
 os.environ.setdefault("tavily_api_key", "fake-tavily-key")
 os.environ.setdefault("firebase_project_id", "fake-project")
 os.environ.setdefault("firebase_service_account_path", "fake-service-account.json")
+os.environ.setdefault("RATE_LIMIT_ENABLED", "false")
 
 import firebase_admin
 import firebase_admin.auth  # noqa: F401
