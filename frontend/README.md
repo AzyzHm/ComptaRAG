@@ -1,6 +1,6 @@
 # ComptaRAG frontend
 
-Angular app for [ComptaRAG](../README.md), an agentic RAG assistant for accounting and financial-law questions. This document covers the frontend specifically, for the project overview, backend, and Firebase setup, see the [root README](../README.md).
+Angular app for [ComptaRAG](../README.md), an agentic RAG assistant for accounting and financial-law questions. This document covers the frontend specifically, for the project overview and backend (including Firebase setup), see the [root README](../README.md) and the [backend README](../backend/README.md).
 
 ## Table of contents
 
@@ -23,7 +23,7 @@ npm install
 npm start
 ```
 
-The app comes up at `http://localhost:4200`. It expects the backend to be running and needs a Firebase web config filled in before anyone can sign in, both are covered in the [root README's getting started section](../README.md#4-getting-started).
+The app comes up at `http://localhost:4200`. It expects the backend to be running, and needs a Firebase web config filled into `src/environments/environment.ts` (and `environment.prod.ts` for a production build) before anyone can sign in, see the [backend README's Firebase setup section](../backend/README.md#2-getting-started).
 
 ## 3. Project structure
 
@@ -36,12 +36,14 @@ src/app/
     home/          Public landing page.
     auth/          Sign-in and sign-up.
     chat/          Chat shell, sidebar, message list, composer.
-    account/       Profile modal.
+    account/       Profile modal: display name, email, and password updates, with a shared show/hide toggle across all three password fields.
     admin/         User role management.
   styles/          Design tokens: _variables.scss, _themes.scss, _mixins.scss.
 ```
 
 Each feature is self-contained: routes, components, and any feature-specific services live together under `features/<name>/`. Anything shared across features, such as the modal, button, and role-badge components, lives under `shared/components/`.
+
+Two guards under `core/guards/` enforce routing rules that mirror the backend: `auth.guard.ts` blocks unauthenticated visitors from `/chat` and sends signed-in visitors away from the public landing page and login screen, and `role.guard.ts` restricts `/admin/users` to the `ADMIN` and `SUPER_ADMIN` roles. See the [backend README's roles section](../backend/README.md#5-roles-and-authorization) for what each role can do, the backend enforces the same rules independently and remains the source of truth.
 
 ## 4. Theming
 
@@ -61,6 +63,7 @@ Two patterns worth knowing about if you are extending the UI:
 
 - **Chat sidebar**: on desktop it is a permanent column that can collapse to a narrow icon rail. Below `$breakpoint-md` it instead becomes an off-canvas drawer with a backdrop, opened with the hamburger button in the chat view and closed by selecting a chat, starting a new one, tapping the backdrop, or pressing Escape.
 - **Modal**: below `$breakpoint-sm` it switches from a centered floating card to a bottom sheet anchored to the viewport's bottom edge, with squared-off bottom corners and tighter padding.
+- **Header**: below `$breakpoint-sm`, `.app-header__right` (theme toggle, profile/sign-in actions) drops onto its own full-width row below the logo, with a border-top divider and its items spaced with `justify-content: space-between`, instead of being squeezed onto the same row as the logo.
 
 Form inputs (`login`, `profile-modal`, the chat composer) hold their font size at 16px or above below `$breakpoint-sm`. Below that size, iOS Safari zooms the whole viewport in when a field gains focus, keeping every input at or above that threshold avoids the jump.
 

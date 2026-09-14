@@ -1,8 +1,9 @@
 import contextlib
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from firebase_admin import auth as firebase_auth
 
+from core.rate_limit import ADMIN_RATE_LIMIT, limiter
 from core.security import require_roles
 from schemas.admin import LimitsUpdateRequest, RoleUpdateRequest
 from schemas.roles import Role
@@ -13,7 +14,9 @@ router = APIRouter(prefix="/admin", tags=["Admin"])
 
 
 @router.get("/users")
+@limiter.limit(ADMIN_RATE_LIMIT)
 async def list_users(
+    request: Request,
     current_user: dict = Depends(require_roles(Role.ADMIN, Role.SUPER_ADMIN)),
 ):
     """Lists accounts the caller is allowed to manage.
@@ -27,7 +30,9 @@ async def list_users(
 
 
 @router.patch("/users/{uid}/role")
+@limiter.limit(ADMIN_RATE_LIMIT)
 async def update_user_role(
+    request: Request,
     uid: str,
     body: RoleUpdateRequest,
     current_user: dict = Depends(require_roles(Role.SUPER_ADMIN)),
@@ -57,7 +62,9 @@ async def update_user_role(
 
 
 @router.patch("/users/{uid}/approve")
+@limiter.limit(ADMIN_RATE_LIMIT)
 async def approve_user(
+    request: Request,
     uid: str,
     current_user: dict = Depends(require_roles(Role.ADMIN, Role.SUPER_ADMIN)),
 ):
@@ -84,7 +91,9 @@ async def approve_user(
 
 
 @router.delete("/users/{uid}", status_code=204)
+@limiter.limit(ADMIN_RATE_LIMIT)
 async def delete_user(
+    request: Request,
     uid: str,
     current_user: dict = Depends(require_roles(Role.ADMIN, Role.SUPER_ADMIN)),
 ):
@@ -112,7 +121,9 @@ async def delete_user(
 
 
 @router.get("/stats/logins")
+@limiter.limit(ADMIN_RATE_LIMIT)
 async def list_login_events(
+    request: Request,
     current_user: dict = Depends(require_roles(Role.ADMIN, Role.SUPER_ADMIN)),
 ):
     """Lists the most recent sign-ins: who logged in, from what IP, and
@@ -122,7 +133,9 @@ async def list_login_events(
 
 
 @router.get("/stats/usage")
+@limiter.limit(ADMIN_RATE_LIMIT)
 async def list_token_usage(
+    request: Request,
     current_user: dict = Depends(require_roles(Role.ADMIN, Role.SUPER_ADMIN)),
 ):
     """Lists running token usage totals per account, including lifetime
@@ -132,7 +145,9 @@ async def list_token_usage(
 
 
 @router.get("/users/{uid}/limits")
+@limiter.limit(ADMIN_RATE_LIMIT)
 async def get_user_limits(
+    request: Request,
     uid: str,
     current_user: dict = Depends(require_roles(Role.ADMIN, Role.SUPER_ADMIN)),
 ):
@@ -154,7 +169,9 @@ async def get_user_limits(
 
 
 @router.patch("/users/{uid}/limits")
+@limiter.limit(ADMIN_RATE_LIMIT)
 async def update_user_limits(
+    request: Request,
     uid: str,
     body: LimitsUpdateRequest,
     current_user: dict = Depends(require_roles(Role.ADMIN, Role.SUPER_ADMIN)),

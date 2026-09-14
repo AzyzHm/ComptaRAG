@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, Request
 
+from core.rate_limit import AUTH_RATE_LIMIT, limiter
 from core.security import get_current_user
 from schemas.auth import UpdateProfileRequest
 from services.stats_service import client_ip_from_request, record_login
@@ -9,6 +10,7 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
 @router.get("/me")
+@limiter.limit(AUTH_RATE_LIMIT)
 async def read_current_user(request: Request, current_user: dict = Depends(get_current_user)):
     """Returns the caller's profile, creating it on their very first sign-in.
 
@@ -26,8 +28,9 @@ async def read_current_user(request: Request, current_user: dict = Depends(get_c
 
 
 @router.patch("/me")
+@limiter.limit(AUTH_RATE_LIMIT)
 async def update_current_user(
-    body: UpdateProfileRequest, current_user: dict = Depends(get_current_user)
+    request: Request, body: UpdateProfileRequest, current_user: dict = Depends(get_current_user)
 ):
     """Syncs the caller's display name and/or email into Firestore.
 
