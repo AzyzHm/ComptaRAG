@@ -20,6 +20,7 @@ dependencies = [
     "pypdf>=6.3,<7",
     "firebase-admin>=7.5,<8",
     "requests>=2.32,<3",
+    "slowapi>=0.1.9,<0.2",
 ]
 
 # This package ships no importable code of its own, config/graph/routes/services
