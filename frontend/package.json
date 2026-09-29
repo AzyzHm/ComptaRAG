@@ -48,19 +48,19 @@
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/user-event": "^14.6.7",
     "@types/jest": "^30.0.0",
-    "@types/node": "^26.6.1",
+    "@types/node": "^26.6.2",
     "angular-eslint": "^22.5.0",
     "eslint": "^9.13.0",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.6",
     "jest": "^30.5.2",
     "jest-environment-jsdom": "^30.5.2",
-    "jest-preset-angular": "^17.0.0",
+    "jest-preset-angular": "^17.0.1",
     "lint-staged": "^17.5.1",
-    "prettier": "^3.9.8",
+    "prettier": "^3.9.9",
     "ts-node": "^10.9.2",
     "typescript": "~5.9.0",
-    "typescript-eslint": "^8.70.0"
+    "typescript-eslint": "^8.70.1"
   },
   "lint-staged": {
     "*.{ts}": [
