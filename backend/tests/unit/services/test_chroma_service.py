@@ -9,9 +9,7 @@ import services.chroma_service as chroma_service_mod
 class TestChromaService:
     def test_constructs_persistent_client_with_expected_path(self, monkeypatch):
         mock_client_cls = MagicMock()
-        mock_client_cls.return_value.get_or_create_collection.return_value = (
-            "the-collection"
-        )
+        mock_client_cls.return_value.get_or_create_collection.return_value = "the-collection"
         monkeypatch.setattr(chromadb, "PersistentClient", mock_client_cls)
 
         reloaded = importlib.reload(chroma_service_mod)
@@ -32,9 +30,7 @@ class TestChromaService:
 
     def test_collection_is_created_when_missing(self, monkeypatch):
         mock_client_cls = MagicMock()
-        mock_client_cls.return_value.get_or_create_collection.return_value = (
-            "new-collection"
-        )
+        mock_client_cls.return_value.get_or_create_collection.return_value = "new-collection"
         monkeypatch.setattr(chromadb, "PersistentClient", mock_client_cls)
 
         reloaded = importlib.reload(chroma_service_mod)
