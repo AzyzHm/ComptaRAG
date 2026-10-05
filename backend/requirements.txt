@@ -61,7 +61,7 @@ markdown-it-py==4.2.0
 mdurl==0.1.2
 mmh3==5.3.0
 msgpack==1.2.2
-multidict==6.7.1
+multidict==7.0.0
 numpy==2.5.2
 oauthlib==3.3.1
 ollama==0.6.2
