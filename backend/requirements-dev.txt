@@ -1,15 +1,15 @@
 -r requirements.txt
 
 # Test tooling
-coverage==7.16.0
+coverage==7.16.2
 iniconfig==2.3.0
 pluggy==1.6.0
 pytest-cov==6.3.0
 pytest==8.4.2
 
 # Lint / type-check tooling
-librt==0.15.0
+librt==0.16.0
 mypy==1.20.2
 mypy_extensions==1.1.0
 pathspec==1.1.1
-ruff==0.16.5
+ruff==0.16.10
