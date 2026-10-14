@@ -42,7 +42,7 @@
     "@angular-eslint/builder": "^22.5.0",
     "@angular-eslint/schematics": "^22.5.0",
     "@angular/cli": "^21.2.20",
-    "@angular/compiler-cli": "^21.2.19",
+    "@angular/compiler-cli": "^22.2.2",
     "@playwright/test": "^1.63.0",
     "@testing-library/angular": "^19.5.0",
     "@testing-library/jest-dom": "^7.0.1",
