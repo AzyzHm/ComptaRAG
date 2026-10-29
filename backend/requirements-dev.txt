@@ -1,7 +1,7 @@
 -r requirements.txt
 
 # Test tooling
-coverage==7.16.2
+coverage==7.17.0
 iniconfig==2.3.1
 pluggy==1.7.0
 pytest-cov==6.3.0
@@ -12,4 +12,4 @@ librt==0.16.0
 mypy==1.20.2
 mypy_extensions==1.1.0
 pathspec==1.1.1
-ruff==0.17.1
+ruff==0.17.2
