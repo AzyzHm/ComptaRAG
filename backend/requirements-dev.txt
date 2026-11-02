@@ -5,7 +5,7 @@ coverage==7.17.0
 iniconfig==2.3.1
 pluggy==1.7.0
 pytest-cov==6.3.0
-pytest==8.4.2
+pytest==9.2.0
 
 # Lint / type-check tooling
 librt==0.16.0

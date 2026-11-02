@@ -32,7 +32,7 @@ packages = []
 
 [project.optional-dependencies]
 test = [
-    "pytest>=8.3,<9",
+    "pytest>=8.3,<10",
     "pytest-cov>=6.0,<7",
     "httpx>=0.28,<1",
 ]
